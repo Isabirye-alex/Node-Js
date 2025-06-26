@@ -1,63 +1,69 @@
-const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const { MongoClient, ServerApiVersion } = require('mongodb');
-
+const express = require("express");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const app = express();
-app.use(cors());
 app.use(bodyParser.json());
+const port = 3000;
 
-const uri = "mongodb+srv://Lexus:Isabirye011%401@alexcluster.iudqq4y.mongodb.net/?retryWrites=true&w=majority&appName=Alexcluster";
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
+const uri =
+  "mongodb+srv://Lexus:Isabirye011%401@alexcluster.iudqq4y.mongodb.net/Easy_Mall?retryWrites=true&w=majority&appName=Alexcluster";
+mongoose.connect(uri);
+const db = mongoose.connection;
+db.on("error", (error) => console.log(error));
+db.once("open", (open) => console.log("Db opened successfully"));
+
+app.get("/", (req, res) => {
+  res.json("App is working Wonderfully");
 });
 
-let usersCollection;
-
-async function connectDB() {
-    try {
-        await client.connect();
-        const db = client.db("testdb"); // use your actual DB name here
-        usersCollection = db.collection("users");
-        console.log("✅ Connected to MongoDB");
-    } catch (err) {
-        console.error("❌ DB connection error:", err);
-    }
-}
-
-connectDB();
-
-// ✅ Root route
-app.get('/', (req, res) => {
-    res.send('✅ API is running. Use /users to interact with the database.');
+app.listen(port, () => {
+  console.log(`Server is running at port ${port}`);
 });
 
-// POST route: add a user
+const { Schema, model } = mongoose;
+const userShcema = new Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Please name is required"],
+    },
+    email: {
+      type: String,
+      required: [true, "Please enter your email"],
+    },
+    password: {
+      type: String,
+      required: [true, "Please enter password"],
+    },
+    image: {
+      type: String,
+      required: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const user = model('user', userShcema);
+
+//Part to handle user insertion into the database
 app.post('/users', async (req, res) => {
-    try {
-        const user = req.body;
-        const result = await usersCollection.insertOne(user);
-        res.json(result);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+  try {
+    const newUser = await user.create(req.body);
+    res.status(201).json(newUser); // Respond with created user
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
-// GET route: list all users
 app.get('/users', async (req, res) => {
-    try {
-        const users = await usersCollection.find().toArray();
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+  try {
+    const allUsers = await user.find(req.body);
+    res.status(201).json(allUsers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+  
+})
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running at http://localhost:${PORT}`);
-});
