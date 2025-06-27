@@ -19,7 +19,11 @@ db.once("open", () => console.log("Db opened successfully"));
 
 // Routes
 const categoryRoutes = require('./routes/category.routes');
+const subCategoryRoutes = require('./routes/subCategory.routes.js');
+const productRoutes = require('./routes/product.routes.js');
 app.use('/categories', categoryRoutes);
+app.use('/categories/:categoryById/subcategories', subCategoryRoutes);
+app.use('/categories/:categoryById/subcategories/getProductById/products', productRoutes );
 
 // Test root
 app.get("/", (req, res) => {
