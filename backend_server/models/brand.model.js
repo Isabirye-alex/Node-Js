@@ -5,7 +5,14 @@ const brandSchema = new Schema({
   name: { type: String, required: true, unique: true, trim: true },
   logoUrl: { type: String },
   description: { type: String },
-  createdAt: { type: Date, default: Date.now },
+  subcategoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Subcategory',
+      required: true
+    },
+},
+  {
+  timestamps: true
 });
 
 const Brand = model('Brand', brandSchema);

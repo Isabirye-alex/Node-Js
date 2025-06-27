@@ -21,9 +21,11 @@ db.once("open", () => console.log("Db opened successfully"));
 const categoryRoutes = require('./routes/category.routes');
 const subCategoryRoutes = require('./routes/subCategory.routes.js');
 const productRoutes = require('./routes/product.routes.js');
+const brandRoutes = require('./routes/brand.routes.js');
 app.use('/categories', categoryRoutes);
 app.use('/subcategories', subCategoryRoutes);
 app.use('/products', productRoutes);
+app.use('/brands', brandRoutes);
 
 
 // Test root
