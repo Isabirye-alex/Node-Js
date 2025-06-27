@@ -14,7 +14,7 @@ const couponSchema = new Schema({
     required: true
   },
   discountAmount: {
-    tyep: Number,
+    type: Number,
     required: true
   },
   applicableCategory: {

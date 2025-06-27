@@ -2,6 +2,7 @@ const User = require('../models/user.model.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
 async function registerNewUser(req, res) {
     try { 
         const { fullname, email, username, password, imageUrl } = req.body;
@@ -26,9 +27,9 @@ async function registerNewUser(req, res) {
 
 async function userLogin(req, res) {
     try {
-        const { username, password } = req.body;
+        const { userName, password } = req.body;
         //Check if user exists
-        const checkUserExistence = await User.findOne({ username });
+        const checkUserExistence = await User.findOne({ userName });
         if (!checkUserExistence) {
             res.status(400).json({ success: false, message: 'Invalid credentials' });
         }
@@ -38,9 +39,14 @@ async function userLogin(req, res) {
             res.status(400).json({ success: false, message: 'Invalid log in credentials! cross check password and try again' });
         }
         //create token
-        const token = await jwt.sign(id:checkUserExistence._id, )
-
+        const token = jwt.sign({ id: checkUserExistence._id }, process.env.SECRET_ACCESS_TOKEN );
+        res.json({ token, checkUserExistence: { id:checkUserExistence._id,username:checkUserExistence.userName } });
      } catch (error) {
-        
+        res.status(500).json({ success: false, message: 'Log in failed. Check your credentials and try again', error:error.message});
     }
+}
+
+module.exports = {
+    registerNewUser,
+    userLogin
 }
