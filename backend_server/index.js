@@ -64,8 +64,8 @@ app.get('/users', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-  
-});
+}
+);
 
 app.get('/users/:id', async (req, res) => {
   try {
