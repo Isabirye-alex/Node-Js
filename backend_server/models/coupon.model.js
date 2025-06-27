@@ -9,9 +9,21 @@ const couponSchema = new Schema({
     uppercase: true,
     trim: true
   },
+  minimumPurchaseAmount: {
+    type: Number,
+    required: true
+  },
+  discountAmount: {
+    tyep: Number,
+    required: true
+  },
+  applicableCategory: {
+    ref: 'Category',
+    type: mongoose.Schema.Types.ObjectId
+  },
   discountType: {
     type: String,
-    enum: ['percentage', 'flat'],
+    enum: ['fixed', 'percentage'],
     required: true
   },
   discountValue: {
