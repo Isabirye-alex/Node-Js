@@ -29,10 +29,29 @@ async function createSubCategory(req, res) {
   }
 }
 
-// Get All Subcategories
+// Get All Subcategories with Category Info
+// Get All Subcategories (optionally filtered by category_id)
 async function getSubCategory(req, res) {
   try {
-    const [subcategories] = await db.query('SELECT * FROM subcategories');
+    const { category_id } = req.query;
+
+    let sql = `
+      SELECT 
+        s.id, s.name, s.description, s.imageUrl, s.category_id,
+        c.name AS categoryName
+      FROM subcategories s
+      JOIN categories c ON s.category_id = c.id
+    `;
+
+    const params = [];
+
+    if (category_id) {
+      sql += ` WHERE s.category_id = ?`;
+      params.push(category_id);
+    }
+
+    const [subcategories] = await db.query(sql, params);
+
     if (subcategories.length === 0) {
       return res.status(404).json({ success: false, message: 'No subcategories found' });
     }
@@ -47,11 +66,19 @@ async function getSubCategory(req, res) {
   }
 }
 
-// Get Subcategory by ID
+// Get Subcategory by ID with Category Info
 async function getSubCategoryById(req, res) {
   try {
     const { id } = req.params;
-    const [subcategory] = await db.query('SELECT * FROM subcategories WHERE id = ?', [id]);
+    const [subcategory] = await db.query(`
+      SELECT 
+        s.id, s.name, s.description, s.imageUrl, s.category_id,
+        c.name AS categoryName
+      FROM subcategories s
+      JOIN categories c ON s.category_id = c.id
+      WHERE s.id = ?
+    `, [id]);
+
     if (subcategory.length === 0) {
       return res.status(404).json({ success: false, message: 'Subcategory not found' });
     }
