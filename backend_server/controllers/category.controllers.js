@@ -21,19 +21,18 @@ async function getAllCategories(req, res) {
 // POST a new category
 async function createCategory(req, res) {
   try {
-    const { name, imageUrl, subCategory } = req.body;
+    const { name, imageUrl} = req.body;
 
     if (!name || !imageUrl) {
       return res.status(400).json({ success: false, message: 'Name and imageUrl are required' });
     }
 
-    const existing = await Category.findOne({ name: name.toLowerCase().trim() });
+    const existing = await db.query('SELECT * FROM categories WHERE name = ?', [name]);
     if (existing) {
       return res.status(409).json({ success: false, message: 'Category already exists' });
     }
 
-    const newCategory = new Category({ name, imageUrl, subCategory });
-    await newCategory.save();
+    const newBrand = await db.query('INSERT INTO categories (name, imageUrl) VALUES(?, ?)', [name, imageUrl])
 
     res.status(201).json({
       success: true,

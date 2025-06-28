@@ -1,22 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 const dotenv = require('dotenv'); 
+dotenv.config();
+
+const db = require('./controllers/db.controller.js'); // Only used for queries
 const app = express();
 const port = 3000;
-dotenv.config();
 
 // Middleware
 app.use(bodyParser.json());
 app.use(express.json());
-
-// MongoDB connection
-const uri = process.env.MONGO_URL;
-mongoose.connect(uri);
-
-const db = mongoose.connection;
-db.on("error", (error) => console.log(error));
-db.once("open", () => console.log("Db opened successfully"));
 
 // Routes
 const categoryRoutes = require('./routes/category.routes');
@@ -31,6 +24,7 @@ const paymentRoutes = require('./routes/payment.routes.js');
 const userRoutes = require('./routes/user.routes.js');
 const cartRoutes = require('./routes/cart.routes.js');
 const orderRoutes = require('./routes/order.routes.js');
+
 app.use('/categories', categoryRoutes);
 app.use('/subcategories', subCategoryRoutes);
 app.use('/products', productRoutes);
@@ -40,11 +34,9 @@ app.use('/admin', adminRoutes);
 app.use('/review', reviewRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/payments', paymentRoutes);
-app.use('/user', userRoutes);
+app.use('/users', userRoutes);
 app.use('/cart', cartRoutes);
 app.use('/order', orderRoutes);
-
-
 
 // Test root
 app.get("/", (req, res) => {

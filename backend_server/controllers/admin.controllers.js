@@ -1,86 +1,117 @@
-const Admin = require('../models/admin.model');
+const db = require('../controllers/db.controller.js'); 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // Register Admin
 async function createAdmin(req, res) {
   try {
-    const { fullName, email, userName, password } = req.body;
-    if (!fullName || !email || !userName || !password) {
-      return res.status(400).json({ success: false, message: 'All fields are required' });
+    const { firstName, lastName, email, username, password } = req.body;
+
+    if (!firstName || !lastName||!email || !username || !password) {
+      return res.status(400).json({ success: false, message: 'All fields except image are required' });
     }
 
-    const existing = await Admin.findOne({ $or: [{ email }, { userName }] });
-    if (existing) {
-      return res.status(409).json({ success: false, message: 'Admin already exists with this email or username' });
+    const [existing] = await db.query(
+      'SELECT * FROM admin WHERE email = ? OR username = ?',
+      [email, username]
+    );
+
+    if (existing.length > 0) {
+      return res.status(409).json({ success: false, message: 'Username or Email already registered' });
     }
 
-    const admin = new Admin({ fullName, email, userName, password });
-    await admin.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    res.status(201).json({ success: true, message: 'Admin registered successfully', data: admin });
+    await db.query(
+      'INSERT INTO admin (firstName, lastName, email, username, password) VALUES (?, ?, ?, ?, ?)',
+      [firstName,lastName, email, username, hashedPassword|| null]
+    );
+
+    res.status(201).json({ success: true, message: 'Admin account successfully created' });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to create admin', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to register admin', error: error.message });
   }
 }
 
-// Admin Login
+// Login Admin
 async function adminLogin(req, res) {
   try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ success: false, message: 'Email and password are required' });
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Username and password are required' });
     }
 
-    const admin = await Admin.findOne({ email });
+    const [adminRows] = await db.query(
+      'SELECT * FROM admin WHERE username = ?',
+      [username]
+    );
+
+    const admin = adminRows[0];
+
     if (!admin) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(400).json({ success: false, message: 'Invalid username' });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(400).json({ success: false, message: 'Invalid login credentials' });
     }
 
-    const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ id: admin.id, role: 'admin' }, process.env.SECRET_ACCESS_TOKEN);
 
-    res.status(200).json({ success: true, message: 'Login successful', token, data: admin });
+    res.json({
+      success: true,
+      token,
+      admin: {
+        id: admin.id,
+        fullName: admin.fullName,
+        email: admin.email,
+        username: admin.username,
+        imageUrl: admin.imageUrl
+      }
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Login error', error: error.message });
+    res.status(500).json({ success: false, message: 'Login failed', error: error.message });
   }
 }
 
-// Get All Admins
+// Get all admins
 async function getAdmins(req, res) {
   try {
-    const admins = await Admin.find();
+    const [admins] = await db.query('SELECT * FROM admin');
     res.status(200).json({ success: true, data: admins });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching admins' });
+    res.status(500).json({ success: false, message: 'Error fetching admins', error: error.message });
   }
 }
 
-// Get Admin by ID
+// Get admin by ID
 async function getAdminById(req, res) {
   try {
     const { id } = req.params;
-    const admin = await Admin.findById(id);
+    const [result] = await db.query('SELECT * FROM admin WHERE id = ?', [id]);
+    const admin = result[0];
     if (!admin) return res.status(404).json({ success: false, message: 'Admin not found' });
     res.status(200).json({ success: true, data: admin });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error retrieving admin' });
+    res.status(500).json({ success: false, message: 'Error retrieving admin', error: error.message });
   }
 }
 
-// Delete Admin
+// Delete admin
 async function deleteAdmin(req, res) {
   try {
     const { id } = req.params;
-    const deleted = await Admin.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ success: false, message: 'Admin not found' });
+    const [result] = await db.query('DELETE FROM admin WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Admin not found' });
+    }
     res.status(200).json({ success: true, message: 'Admin deleted successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error deleting admin' });
+    res.status(500).json({ success: false, message: 'Error deleting admin', error: error.message });
   }
 }
 

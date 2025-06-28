@@ -1,5 +1,4 @@
-const Brand = require('../models/brand.model.js');
-
+const db = require('../controllers/db.controller.js'); 
 async function createBrand(req, res) {
     try {
         const { name, logoUrl, description } = req.body;
