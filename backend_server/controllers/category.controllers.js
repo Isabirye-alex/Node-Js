@@ -1,10 +1,11 @@
-const Category = require('../models/category.model');
+const db = require('./db.controller.js');
 
 // GET all categories
 async function getAllCategories(req, res) {
   try {
-    const categories = await Category.find();
-    if (!categories || categories.length === 0) {
+    const [categories] = await db.query('SELECT * FROM categories');
+
+    if (categories.length === 0) {
       return res.status(404).json({ success: false, message: 'No categories found' });
     }
 
@@ -21,23 +22,27 @@ async function getAllCategories(req, res) {
 // POST a new category
 async function createCategory(req, res) {
   try {
-    const { name, imageUrl} = req.body;
+    const { name, imageUrl } = req.body;
 
     if (!name || !imageUrl) {
       return res.status(400).json({ success: false, message: 'Name and imageUrl are required' });
     }
 
-    const existing = await db.query('SELECT * FROM categories WHERE name = ?', [name]);
-    if (existing) {
+    const [existing] = await db.query('SELECT * FROM categories WHERE name = ?', [name]);
+
+    if (existing.length > 0) {
       return res.status(409).json({ success: false, message: 'Category already exists' });
     }
 
-    const newBrand = await db.query('INSERT INTO categories (name, imageUrl) VALUES(?, ?)', [name, imageUrl])
+    const [result] = await db.query(
+      'INSERT INTO categories (name, imageUrl) VALUES (?, ?)',
+      [name, imageUrl]
+    );
 
     res.status(201).json({
       success: true,
       message: 'Category created successfully',
-      data: newCategory
+      data: { id: result.insertId, name, imageUrl }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -48,13 +53,13 @@ async function createCategory(req, res) {
 async function getCategoryById(req, res) {
   try {
     const { id } = req.params;
-    const category = await Category.findById(id);
+    const [rows] = await db.query('SELECT * FROM categories WHERE id = ?', [id]);
 
-    if (!category) {
+    if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
 
-    res.status(200).json({ success: true, data: category });
+    res.status(200).json({ success: true, message: 'Category fetched', data: rows[0] });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Invalid ID or server error' });
   }
@@ -64,19 +69,20 @@ async function getCategoryById(req, res) {
 async function updateCategoryById(req, res) {
   try {
     const { id } = req.params;
-    const { name, imageUrl, subCategory } = req.body;
+    const { name } = req.body;
 
-    const updatedCategory = await Category.findByIdAndUpdate(
-      id,
-      { name, imageUrl, subCategory },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedCategory) {
+    const [category] = await db.query('SELECT * FROM categories WHERE id = ?', [id]);
+    if (category.length === 0) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
 
-    res.status(200).json({ success: true, message: 'Category updated successfully', data: updatedCategory });
+    await db.query('UPDATE categories SET name = ? WHERE id = ?', [name, id]);
+
+    res.status(200).json({
+      success: true,
+      message: 'Category updated successfully',
+      data: { id, name }
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -86,11 +92,13 @@ async function updateCategoryById(req, res) {
 async function deleteCategoryById(req, res) {
   try {
     const { id } = req.params;
-    const deleted = await Category.findByIdAndDelete(id);
 
-    if (!deleted) {
+    const [category] = await db.query('SELECT * FROM categories WHERE id = ?', [id]);
+    if (category.length === 0) {
       return res.status(404).json({ success: false, message: 'Category not found' });
     }
+
+    await db.query('DELETE FROM categories WHERE id = ?', [id]);
 
     res.status(200).json({ success: true, message: 'Category deleted successfully' });
   } catch (error) {

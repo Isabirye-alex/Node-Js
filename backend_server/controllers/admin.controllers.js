@@ -82,6 +82,9 @@ async function adminLogin(req, res) {
 async function getAdmins(req, res) {
   try {
     const [admins] = await db.query('SELECT * FROM admin');
+    if (![admins] > 0) {
+      res.status(404).json({success:false, message:'No admins found'})
+    }
     res.status(200).json({ success: true, data: admins });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching admins', error: error.message });

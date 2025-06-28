@@ -1,46 +1,49 @@
-const Subcategory = require('../models/subCategory.model.js');
+const db = require('./db.controller.js');
 
 // Create Subcategory
 async function createSubCategory(req, res) {
   try {
-    const { name, category, description, imageUrl } = req.body;
-    if (!name || !category || !description || !imageUrl) {
+    const { name, category_id, description, imageUrl } = req.body;
+
+    if (!name || !category_id || !description || !imageUrl) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
-    const existing = await Subcategory.findOne({ name: name.toLowerCase().trim(), category: category });
-    if (existing) {
+    const [existing] = await db.query('SELECT * FROM subcategories WHERE name = ?', [name]);
+    if (existing.length > 0) {
       return res.status(409).json({ success: false, message: 'Subcategory already exists' });
     }
 
-    const newSubCategory = new Subcategory({ name, imageUrl, description, category });
-    await newSubCategory.save();
+    const [result] = await db.query(
+      'INSERT INTO subcategories (name, category_id, description, imageUrl) VALUES (?, ?, ?, ?)',
+      [name, category_id, description, imageUrl]
+    );
 
     res.status(201).json({
       success: true,
       message: 'New subcategory saved successfully',
-      data: newSubCategory
+      data: { id: result.insertId, name, category_id, description, imageUrl }
     });
-  }catch (error) {
+  } catch (error) {
     res.status(500).json({ success: false, message: 'Error saving subcategory', error: error.message });
-  }  
+  }
 }
 
 // Get All Subcategories
 async function getSubCategory(req, res) {
   try {
-    const subCategories = await Subcategory.find();
-    if (!subCategories.length) {
+    const [subcategories] = await db.query('SELECT * FROM subcategories');
+    if (subcategories.length === 0) {
       return res.status(404).json({ success: false, message: 'No subcategories found' });
     }
 
     res.status(200).json({
       success: true,
       message: 'Subcategories retrieved successfully',
-      data: subCategories
+      data: subcategories
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching subcategories' });
+    res.status(500).json({ success: false, message: 'Error fetching subcategories', error: error.message });
   }
 }
 
@@ -48,18 +51,18 @@ async function getSubCategory(req, res) {
 async function getSubCategoryById(req, res) {
   try {
     const { id } = req.params;
-    const subCategory = await Subcategory.findById(id);
-    if (!subCategory) {
+    const [subcategory] = await db.query('SELECT * FROM subcategories WHERE id = ?', [id]);
+    if (subcategory.length === 0) {
       return res.status(404).json({ success: false, message: 'Subcategory not found' });
     }
 
     res.status(200).json({
       success: true,
       message: 'Subcategory retrieved successfully',
-      data: subCategory
+      data: subcategory[0]
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Invalid subcategory ID' });
+    res.status(500).json({ success: false, message: 'Invalid subcategory ID', error: error.message });
   }
 }
 
@@ -67,25 +70,25 @@ async function getSubCategoryById(req, res) {
 async function updateSubCategory(req, res) {
   try {
     const { id } = req.params;
-    const { name, description, imageUrl, category } = req.body;
+    const { name, description, imageUrl } = req.body;
 
-    const updatedCategory = await Subcategory.findByIdAndUpdate(
-      id,
-      { name, description, imageUrl, category },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedCategory) {
+    const [existing] = await db.query('SELECT * FROM subcategories WHERE id = ?', [id]);
+    if (existing.length === 0) {
       return res.status(404).json({ success: false, message: 'Subcategory not found' });
     }
+
+    await db.query(
+      'UPDATE subcategories SET name = ?, description = ?, imageUrl = ? WHERE id = ?',
+      [name, description, imageUrl, id]
+    );
 
     res.status(200).json({
       success: true,
       message: 'Subcategory updated successfully',
-      data: updatedCategory
+      data: { id, name, description, imageUrl }
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error updating subcategory' });
+    res.status(500).json({ success: false, message: 'Error updating subcategory', error: error.message });
   }
 }
 
@@ -93,15 +96,15 @@ async function updateSubCategory(req, res) {
 async function deleteSubCategory(req, res) {
   try {
     const { id } = req.params;
-    const deleted = await Subcategory.findByIdAndDelete(id);
-
-    if (!deleted) {
+    const [existing] = await db.query('SELECT * FROM subcategories WHERE id = ?', [id]);
+    if (existing.length === 0) {
       return res.status(404).json({ success: false, message: 'Subcategory not found' });
     }
 
+    await db.query('DELETE FROM subcategories WHERE id = ?', [id]);
     res.status(200).json({ success: true, message: 'Subcategory deleted successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error deleting subcategory' });
+    res.status(500).json({ success: false, message: 'Error deleting subcategory', error: error.message });
   }
 }
 
