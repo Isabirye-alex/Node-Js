@@ -15,7 +15,7 @@ async function createProduct(req, res) {
       brand = ''
     } = req.body;
 
-    if (!name || !description || !category_id || !subcategory_id || price == null || stock == null) {
+    if (!name || !description || !category_id || !subcategory_id || price == null || stock == null||imageUrl) {
       return res.status(400).json({ success: false, message: 'Required fields are missing' });
     }
 

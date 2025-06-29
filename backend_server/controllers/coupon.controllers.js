@@ -56,7 +56,7 @@ try {
     if (coupon.applicable_category_id !== null && coupon.applicable_category_id != parseInt(category_id)) {
       res.status(400).json({ succes: false, message: 'Coupon does not apply to this product category' });
   }
-  await db.query(`UPDATE coupons SET is_active = 0 WHERE id = ?`, [coupon.id]);
+  await db.query(`UPDATE coupons SET is_active = 0, used_count = 1 WHERE id = ?`, [coupon.id]);
     res.status(201).json({
       success: true, message: 'Coupon applied successfully',
       discount_type: coupon.discount_type,
