@@ -1,44 +1,57 @@
-const Order = require('../models/order.model.js');
+const db = require('../controllers/db.controller.js');
 
 // Create Order
 async function createOrder(req, res) {
   try {
     const {
-      userId,
-      items,
-      totalAmount,
-      shippingAddress,
-      paymentMethod,
-      isPaid,
-      paidAt,
-      deliveredAt
+      user_id,
+      total_amount,
+      shipping_address,
+      payment_method,
+      is_paid,
+      paid_at,
+      delivered_at,
+      status
     } = req.body;
 
     // Basic validation
-    if (!userId || !items || !items.length || !totalAmount || !shippingAddress || !paymentMethod) {
+    if (!user_id || !total_amount || !shipping_address || !payment_method) {
       return res.status(400).json({
         success: false,
         message: 'All required fields must be provided'
       });
     }
 
-    const newOrder = new Order({
-      userId,
-      items,
-      totalAmount,
-      shippingAddress,
-      paymentMethod,
-      isPaid,
-      paidAt,
-      deliveredAt
-    });
-
-    await newOrder.save();
+    const [result] = await db.query(
+      `INSERT INTO orders 
+        (user_id, total_amount, shipping_address, payment_method, is_paid, paid_at, delivered_at, status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        user_id,
+        total_amount,
+        shipping_address,
+        payment_method,
+        is_paid || false,
+        paid_at || null,
+        delivered_at || null,
+        status || 'pending'
+      ]
+    );
 
     res.status(201).json({
       success: true,
       message: 'Order created successfully',
-      data: newOrder
+      data: {
+        id: result.insertId,
+        user_id,
+        total_amount,
+        shipping_address,
+        payment_method,
+        is_paid: is_paid || false,
+        paid_at: paid_at || null,
+        delivered_at: delivered_at || null,
+        status: status || 'pending'
+      }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error creating order', error: error.message });
@@ -48,8 +61,13 @@ async function createOrder(req, res) {
 // Get All Orders
 async function getOrders(req, res) {
   try {
-    const orders = await Order.find().populate('userId').populate('items.productId');
-    if (!orders.length) {
+    const [orders] = await db.query(`
+      SELECT orders.*, users.name AS user_name
+      FROM orders
+      JOIN users ON orders.user_id = users.id
+    `);
+
+    if (orders.length === 0) {
       return res.status(404).json({ success: false, message: 'No orders found' });
     }
 
@@ -59,7 +77,7 @@ async function getOrders(req, res) {
       data: orders
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching orders' });
+    res.status(500).json({ success: false, message: 'Error fetching orders', error: error.message });
   }
 }
 
@@ -67,19 +85,25 @@ async function getOrders(req, res) {
 async function getOrderById(req, res) {
   try {
     const { id } = req.params;
-    const order = await Order.findById(id).populate('userId').populate('items.productId');
 
-    if (!order) {
+    const [rows] = await db.query(`
+      SELECT orders.*, users.name AS user_name
+      FROM orders
+      JOIN users ON orders.user_id = users.id
+      WHERE orders.id = ?
+    `, [id]);
+
+    if (rows.length === 0) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
     res.status(200).json({
       success: true,
       message: 'Order retrieved successfully',
-      data: order
+      data: rows[0]
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Invalid order ID' });
+    res.status(500).json({ success: false, message: 'Invalid order ID', error: error.message });
   }
 }
 
@@ -87,23 +111,38 @@ async function getOrderById(req, res) {
 async function updateOrder(req, res) {
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const {
+      total_amount,
+      status,
+      shipping_address,
+      payment_method,
+      is_paid,
+      paid_at,
+      delivered_at
+    } = req.body;
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    ).populate('userId').populate('items.productId');
+    const [result] = await db.query(
+      `UPDATE orders 
+       SET total_amount = ?, status = ?, shipping_address = ?, 
+           payment_method = ?, is_paid = ?, paid_at = ?, delivered_at = ?
+       WHERE id = ?`,
+      [
+        total_amount,
+        status,
+        shipping_address,
+        payment_method,
+        is_paid,
+        paid_at,
+        delivered_at,
+        id
+      ]
+    );
 
-    if (!updatedOrder) {
+    if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    res.status(200).json({
-      success: true,
-      message: 'Order updated successfully',
-      data: updatedOrder
-    });
+    res.status(200).json({ success: true, message: 'Order updated successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error updating order', error: error.message });
   }
@@ -113,15 +152,15 @@ async function updateOrder(req, res) {
 async function deleteOrder(req, res) {
   try {
     const { id } = req.params;
-    const deleted = await Order.findByIdAndDelete(id);
+    const [result] = await db.query('DELETE FROM orders WHERE id = ?', [id]);
 
-    if (!deleted) {
+    if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
     res.status(200).json({ success: true, message: 'Order deleted successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error deleting order' });
+    res.status(500).json({ success: false, message: 'Error deleting order', error: error.message });
   }
 }
 

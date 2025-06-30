@@ -4,9 +4,10 @@ const {
   registerNewUser,
   userLogin, deleteUser, updateUser,getUsers
 } = require('../controllers/user.controllers.js');
+const upload = require('../config/users.config.js');
 
 // Register user
-router.post('/register', registerNewUser);
+router.post('/register', upload.single('image'),registerNewUser);
 
 // Login user
 router.post('/login', userLogin);

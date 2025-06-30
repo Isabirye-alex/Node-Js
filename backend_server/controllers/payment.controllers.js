@@ -1,11 +1,41 @@
-const Payment = require('../models/payment.model');
+const db = require('../controllers/db.controller.js');
+const crypto = require('crypto');
+
+// Generate unique transaction ID
+function generateTransactionId() {
+  return crypto.randomBytes(8).toString('hex'); // 16-char unique ID
+}
 
 // Create Payment
 async function createPayment(req, res) {
   try {
-    const payment = new Payment(req.body);
-    await payment.save();
-    res.status(201).json({ success: true, message: 'Payment created', data: payment });
+    const { user_id, amount, currency, payment_method, status } = req.body;
+
+    if (!user_id || !amount || !currency || !payment_method || !status) {
+      return res.status(400).json({ success: false, message: 'All fields are required' });
+    }
+
+    const transaction_id = generateTransactionId();
+
+    const [result] = await db.query(
+      `INSERT INTO payments (user_id, amount, currency, payment_method, status, transaction_id)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [user_id, amount, currency, payment_method, status, transaction_id]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Payment created',
+      data: {
+        id: result.insertId,
+        user_id,
+        amount,
+        currency,
+        payment_method,
+        status,
+        transaction_id
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create payment', error: error.message });
   }
@@ -14,10 +44,15 @@ async function createPayment(req, res) {
 // Get All Payments
 async function getPayments(req, res) {
   try {
-    const payments = await Payment.find().populate('user');
+    const [payments] = await db.query(`
+      SELECT payments.*, users.name AS user_name
+      FROM payments
+      JOIN users ON payments.user_id = users.id
+    `);
+
     res.status(200).json({ success: true, data: payments });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch payments' });
+    res.status(500).json({ success: false, message: 'Failed to fetch payments', error: error.message });
   }
 }
 
@@ -25,11 +60,21 @@ async function getPayments(req, res) {
 async function getPaymentById(req, res) {
   try {
     const { id } = req.params;
-    const payment = await Payment.findById(id).populate('user');
-    if (!payment) return res.status(404).json({ success: false, message: 'Payment not found' });
-    res.status(200).json({ success: true, data: payment });
+
+    const [rows] = await db.query(`
+      SELECT payments.*, users.name AS user_name
+      FROM payments
+      JOIN users ON payments.user_id = users.id
+      WHERE payments.id = ?
+    `, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+
+    res.status(200).json({ success: true, data: rows[0] });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to get payment' });
+    res.status(500).json({ success: false, message: 'Failed to get payment', error: error.message });
   }
 }
 
@@ -37,11 +82,15 @@ async function getPaymentById(req, res) {
 async function deletePayment(req, res) {
   try {
     const { id } = req.params;
-    const deleted = await Payment.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ success: false, message: 'Payment not found' });
+    const [result] = await db.query('DELETE FROM payments WHERE id = ?', [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: 'Payment not found' });
+    }
+
     res.status(200).json({ success: true, message: 'Payment deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to delete payment' });
+    res.status(500).json({ success: false, message: 'Failed to delete payment', error: error.message });
   }
 }
 

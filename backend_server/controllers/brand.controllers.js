@@ -3,8 +3,9 @@ const db = require('./db.controller.js');
 // CREATE Brand
 async function createBrand(req, res) {
   try {
-    const { name, logoUrl, description } = req.body;
-    if (!name || !logoUrl || !description) {
+    const { name, description, subcategory_id } = req.body;
+    const logo_url = req.file?.path; 
+    if (!name || !logo_url || !description||!subcategory_id) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
 
@@ -14,14 +15,14 @@ async function createBrand(req, res) {
     }
 
     const [result] = await db.query(
-      'INSERT INTO brands (name, logoUrl, description) VALUES (?, ?, ?)',
-      [name, logoUrl, description]
+      'INSERT INTO brands (name, logo_url, description,subcategory_id) VALUES (?, ?, ?,?)',
+      [name, logo_url, description,subcategory_id]
     );
 
     res.status(201).json({
       success: true,
       message: 'Brand successfully saved',
-      data: { id: result.insertId, name, logoUrl, description }
+      data: { id: result.insertId, name, logo_url, description,subcategory_id }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to create brand', error: error.message });
@@ -62,7 +63,7 @@ async function getBrandById(req, res) {
 async function updateBrand(req, res) {
   try {
     const { id } = req.params;
-    const { name, logoUrl, description } = req.body;
+    const { name, logo_url, description } = req.body;
 
     const [existing] = await db.query('SELECT * FROM brands WHERE id = ?', [id]);
     if (!existing.length) {
@@ -70,8 +71,8 @@ async function updateBrand(req, res) {
     }
 
     await db.query(
-      'UPDATE brands SET name = ?, logoUrl = ?, description = ? WHERE id = ?',
-      [name, logoUrl, description, id]
+      'UPDATE brands SET name = ?, logo_url = ?, description = ? WHERE id = ?',
+      [name, logo_url, description, id]
     );
 
     res.status(200).json({ success: true, message: 'Brand updated successfully' });

@@ -4,8 +4,8 @@ const db = require('./db.controller.js');
 
 async function registerNewUser(req, res) {
   try {
-    const { firstName,lastName, email, username, password, imageUrl } = req.body;
-
+    const { firstName,lastName, email, username, password } = req.body;
+    const imageUrl = req.file?.path; 
     if (!firstName ||!lastName || !email || !username || !password) {
       return res.status(400).json({ success: false, message: 'All fields are required except the image' });
     }

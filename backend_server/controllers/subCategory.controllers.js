@@ -3,7 +3,8 @@ const db = require('./db.controller.js');
 // Create Subcategory
 async function createSubCategory(req, res) {
   try {
-    const { name, category_id, description, imageUrl } = req.body;
+    const { name, category_id, description } = req.body;
+    const imageUrl = req.file?.path; 
 
     if (!name || !category_id || !description || !imageUrl) {
       return res.status(400).json({ success: false, message: 'All fields are required' });

@@ -8,8 +8,8 @@ const {   createCart,
 
 
 //Routes to handle all user funcions related to categories
-router.get('/', createCart);    // GET /categories
-router.post('/', getCarts);
+router.get('/', getCarts);    // GET /categories
+router.post('/', createCart);
 router.get('/:id', getCartById);
 router.put('/:id', updateCart);
 router.delete('/:id', deleteCart);// POST /categories

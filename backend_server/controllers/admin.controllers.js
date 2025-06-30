@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 async function createAdmin(req, res) {
   try {
     const { firstName, lastName, email, username, password } = req.body;
-
+    const imageUrl = req.file?.path; // Optional image upload
     if (!firstName || !lastName||!email || !username || !password) {
       return res.status(400).json({ success: false, message: 'All fields except image are required' });
     }
@@ -23,8 +23,8 @@ async function createAdmin(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
-      'INSERT INTO admin (firstName, lastName, email, username, password) VALUES (?, ?, ?, ?, ?)',
-      [firstName,lastName, email, username, hashedPassword|| null]
+      'INSERT INTO admin (firstName, lastName, email, username, password, imageUrl) VALUES (?, ?, ?,?, ?, ?)',
+      [firstName,lastName, email, username, imageUrl,hashedPassword|| null]
     );
 
     res.status(201).json({ success: true, message: 'Admin account successfully created' });

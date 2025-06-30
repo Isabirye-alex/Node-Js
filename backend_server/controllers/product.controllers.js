@@ -1,5 +1,5 @@
 const db = require('./db.controller.js');
-
+//I am still here. Still trying. Still coding
 // Create Product
 async function createProduct(req, res) {
   try {
@@ -10,10 +10,10 @@ async function createProduct(req, res) {
       subcategory_id,
       price,
       stock,
-      imageUrl ,
       is_featured = false,
       brand = ''
     } = req.body;
+    const imageUrl = req.file?.path; 
 
     if (!name || !description || !category_id || !subcategory_id || price == null || stock == null||imageUrl) {
       return res.status(400).json({ success: false, message: 'Required fields are missing' });

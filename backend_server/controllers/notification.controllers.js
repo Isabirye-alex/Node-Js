@@ -2,7 +2,8 @@ const db = require('./db.controller.js');
 
 async function createNotification(req, res) {
   try {
-    const { userId, message, title, is_read = false, imageUrl, broadcast } = req.body;
+    const { userId, message, title, is_read = false, broadcast } = req.body;
+    const imageUrl = req.file?.path; // path is the Cloudinary-hosted URL
 
     if (!message || !title || !imageUrl) {
       return res.status(400).json({ success: false, message: 'Required fields missing' });

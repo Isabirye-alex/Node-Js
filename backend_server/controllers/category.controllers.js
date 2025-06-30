@@ -22,14 +22,14 @@ async function getAllCategories(req, res) {
 // POST a new category
 async function createCategory(req, res) {
   try {
-    const { name, imageUrl } = req.body;
+    const { name } = req.body;
+    const imageUrl = req.file?.path; // Cloudinary URL from multer
 
     if (!name || !imageUrl) {
-      return res.status(400).json({ success: false, message: 'Name and imageUrl are required' });
+      return res.status(400).json({ success: false, message: 'Name and image are required' });
     }
 
     const [existing] = await db.query('SELECT * FROM categories WHERE name = ?', [name]);
-
     if (existing.length > 0) {
       return res.status(409).json({ success: false, message: 'Category already exists' });
     }
@@ -48,6 +48,7 @@ async function createCategory(req, res) {
     res.status(500).json({ success: false, message: error.message });
   }
 }
+
 
 // GET category by ID
 async function getCategoryById(req, res) {
