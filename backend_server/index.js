@@ -5,7 +5,7 @@ dotenv.config();
 
 const db = require('./controllers/db.controller.js'); // Only used for queries
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(bodyParser.json());
