@@ -2,6 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const dotenv = require('dotenv'); 
 dotenv.config();
+const cors = require('cors');
+
 
 const db = require('./controllers/db.controller.js'); // Only used for queries
 const app = express();
@@ -10,6 +12,7 @@ const port = 3000;
 // Middleware
 app.use(bodyParser.json());
 app.use(express.json());
+app.use(cors());
 
 // Routes
 const categoryRoutes = require('./routes/category.routes');

@@ -45,6 +45,7 @@ async function createCategory(req, res) {
       data: { id: result.insertId, name, imageUrl }
     });
   } catch (error) {
+	console.error('Create category error:', error); 
     res.status(500).json({ success: false, message: error.message });
   }
 }

@@ -13,9 +13,11 @@ async function createProduct(req, res) {
       is_featured = false,
       brand = ''
     } = req.body;
-    const imageUrl = req.file?.path; 
 
-    if (!name || !description || !category_id || !subcategory_id || price == null || stock == null||imageUrl) {
+    const isFeaturedValue = is_featured === 'true' || is_featured === true ? 1 : 0;
+    const imageUrl = req.file?.path;
+
+    if (!name || !description || !category_id || !subcategory_id || price == null || stock == null || !imageUrl) {
       return res.status(400).json({ success: false, message: 'Required fields are missing' });
     }
 
@@ -23,7 +25,7 @@ async function createProduct(req, res) {
       `INSERT INTO products 
       (name, description, category_id, subcategory_id, price, stock, imageUrl, is_featured, brand) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name.trim(), description, category_id, subcategory_id, price, stock, JSON.stringify(imageUrl), is_featured, brand]
+      [name.trim(), description, category_id, subcategory_id, price, stock, imageUrl, isFeaturedValue, brand]
     );
 
     res.status(201).json({
@@ -38,15 +40,15 @@ async function createProduct(req, res) {
         price,
         stock,
         imageUrl,
-        is_featured,
+        is_featured: isFeaturedValue,
         brand
       }
     });
   } catch (error) {
+    console.log('Error occurred:', error);
     res.status(500).json({ success: false, message: 'Error creating product', error: error.message });
   }
 }
-
 // Get all Products
 async function getAllProducts(req, res) {
   try {
@@ -142,6 +144,9 @@ async function updateProduct(req, res) {
       brand
     } = req.body;
 
+    // Convert to 0/1 for MySQL
+    const isFeaturedValue = is_featured === 'true' || is_featured === true ? 1 : 0;
+
     const [check] = await db.query('SELECT * FROM products WHERE id = ?', [id]);
     if (check.length === 0) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -154,7 +159,7 @@ async function updateProduct(req, res) {
     `, [
       name, description, category_id, subcategory_id,
       price, stock, JSON.stringify(imageUrl || []),
-      is_featured ?? false, brand ?? '', id
+      isFeaturedValue, brand ?? '', id
     ]);
 
     res.status(200).json({ success: true, message: 'Product updated successfully' });
