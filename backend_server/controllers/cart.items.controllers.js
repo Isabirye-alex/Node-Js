@@ -1,7 +1,5 @@
-const db = require('../controllers/db.controller.js');
-
 // Add item to cart
-const db = require('../controllers/db.controller.js');
+const db = require('./db.controller.js');
 
 // Add or update item in cart, auto-create cart if none exists
 async function addItemToCart(req, res) {
@@ -31,6 +29,19 @@ async function addItemToCart(req, res) {
       cartId = cartResult.insertId;
     }
 
+    // Get product price
+    const [productRows] = await db.query(
+      'SELECT price FROM products WHERE id = ?',
+      [productId]
+    );
+
+    if (productRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const productPrice = parseFloat(productRows[0].price);
+    const itemTotal = productPrice * quantity;
+
     // Check if product already exists in this cart
     const [itemRows] = await db.query(
       'SELECT * FROM cart_items WHERE cart_id = ? AND product_id = ?',
@@ -51,10 +62,16 @@ async function addItemToCart(req, res) {
       );
     }
 
+    // Update total_price in cart
+    await db.query(
+      'UPDATE carts SET total_price = total_price + ? WHERE id = ?',
+      [itemTotal, cartId]
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Item added/updated in cart',
-      data: { cart_id: cartId, product_id: productId, quantity }
+      message: 'Item added/updated in cart and total price updated',
+      data: { cart_id: cartId, product_id: productId, quantity, itemTotal }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error adding item to cart', error: error.message });
@@ -66,10 +83,17 @@ async function getItemsByCartId(req, res) {
   try {
     const { cartId } = req.params;
 
-    const [items] = await db.query(
-      'SELECT * FROM cart_items WHERE cart_id = ?',
-      [cartId]
-    );
+	const [items] = await db.query(
+  `SELECT 
+     ci.*, 
+     p.price, 
+     p.name AS title, 
+     p.imageUrl AS imageUrl 
+   FROM cart_items ci
+   JOIN products p ON ci.product_id = p.id
+   WHERE ci.cart_id = ?`,
+  [cartId]
+);
 
     if (items.length === 0) {
       return res.status(404).json({ success: false, message: 'No items found for this cart' });
@@ -98,8 +122,77 @@ async function removeItemFromCart(req, res) {
   }
 }
 
+// Get active cart by user ID
+async function getActiveCart(req, res) {
+  try {
+    const { userId } = req.params;
+
+    const [rows] = await db.query(
+      'SELECT id FROM carts WHERE user_id = ? AND status = "pending" ORDER BY created_at DESC LIMIT 1',
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'No items found for this cart' });
+    }
+
+    res.status(200).json({ success: true, cart_id: rows[0].id });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error retrieving active cart', error: error.message });
+  }
+}
+
+// Decrease quantity
+async function decreaseCartItemQuantity(req, res) {
+  try {
+    const { itemId } = req.params;
+
+    const [itemRows] = await db.query(
+      'SELECT quantity, cart_id, product_id FROM cart_items WHERE id = ?',
+      [itemId]
+    );
+
+    if (itemRows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Item not found' });
+    }
+
+    const item = itemRows[0];
+
+    if (item.quantity <= 1) {
+      // Optionally delete item if quantity reaches 0
+      await db.query('DELETE FROM cart_items WHERE id = ?', [itemId]);
+    } else {
+      // Get price
+      const [productRows] = await db.query(
+        'SELECT price FROM products WHERE id = ?',
+        [item.product_id]
+      );
+
+      const price = parseFloat(productRows[0].price);
+
+      await db.query(
+        'UPDATE cart_items SET quantity = quantity - 1 WHERE id = ?',
+        [itemId]
+      );
+
+      await db.query(
+        'UPDATE carts SET total_price = total_price - ? WHERE id = ?',
+        [price, item.cart_id]
+      );
+    }
+
+    res.status(200).json({ success: true, message: 'Quantity decreased' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error decreasing quantity', error: error.message });
+  }
+}
+
+
+
 module.exports = {
   addItemToCart,
   getItemsByCartId,
-  removeItemFromCart
+  removeItemFromCart,
+  getActiveCart,
+  decreaseCartItemQuantity
 };

@@ -27,6 +27,7 @@ const paymentRoutes = require('./routes/payment.routes.js');
 const userRoutes = require('./routes/user.routes.js');
 const cartRoutes = require('./routes/cart.routes.js');
 const orderRoutes = require('./routes/order.routes.js');
+const cartItemRoutes = require('./routes/cart.items.routes.js');
 
 app.use('/categories', categoryRoutes);
 app.use('/subcategories', subCategoryRoutes);
@@ -40,6 +41,8 @@ app.use('/payments', paymentRoutes);
 app.use('/users', userRoutes);
 app.use('/cart', cartRoutes);
 app.use('/order', orderRoutes);
+
+app.use('/cart-items', cartItemRoutes); // ✅ Now both work
 
 // Test root
 app.get("/", (req, res) => {
