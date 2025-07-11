@@ -11,24 +11,26 @@ async function registerNewUser(req, res) {
     }
     const [user] = await db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]);
     if (user.length > 0) {
-      res.status(409).json({ success: false, message: 'Username or email already taken' });
+     return res.status(409).json({ success: false, message: 'Username or email already taken' });
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    await db.query('INSERT INTO users(firstName, lastName, email, username, password, imageUrl) VALUES(?,?,?,?,?,?)', [firstName, lastName, email, username, hashedPassword||null, imageUrl]);
+    const [result] = await db.query('INSERT INTO users(firstName, lastName, email, username, password, imageUrl) VALUES(?,?,?,?,?,?)', [firstName, lastName, email, username, hashedPassword, imageUrl]);
 
-    return res.status(201).json({
-      success: true,
-      message: 'User account successfully created',
-      user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        imageUrl:user.imageUrl
-      }
-    });
+return res.status(201).json({
+  success: true,
+  message: 'User account successfully created',
+  user: {
+    id: result.insertId, 
+    firstName,
+    lastName,
+    username,
+    email,
+    imageUrl
+  }
+});
+
 
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Failed to register new user', error: error.message });
@@ -39,30 +41,35 @@ async function userLogin(req, res) {
   try {
     const { username, password } = req.body;
 
-    const [userRows] = await db.query('SELECT * FROM users where username = ?', [username]);
+    const [userRows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
     const user = userRows[0];
-    if (user.length ===0) {
+console.log('userRows:', userRows);
+
+console.log('user:', user);
+
+    if (!user) {
       return res.status(400).json({ success: false, message: 'Invalid username' });
     }
 
+
     const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        console.log("Password does not match for username:", username);
+    if (!isMatch) {
+      console.log("Password does not match for username:", username);
       return res.status(400).json({ success: false, message: 'Invalid login credentials! Cross-check password and try again.' });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1d' });
+    const token = jwt.sign({ id: user.id }, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1d' });
 
     return res.json({
       success: true,
       token,
       user: {
-        id: user._id,
+        id: user.id,
         username: user.username,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
-        imageUrl: user.imageUrl
+        imageUrl: user.imageUrl,
       }
     });
 
@@ -140,10 +147,25 @@ try {
 }
 }
 
+ async function fetchUserByUserId (req, res) {
+  const { id } = req.params;
+  try {
+    const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.status(200).json({ success: true, user: rows[0] });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}
+
+
 module.exports = {
   registerNewUser,
   userLogin,
   updateUser, 
   deleteUser,
-  getUsers
+  getUsers,
+fetchUserByUserId
 };

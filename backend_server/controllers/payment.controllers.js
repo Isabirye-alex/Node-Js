@@ -1,4 +1,4 @@
-const db = require('../controllers/db.controller.js');
+const db = require('./db.controller.js');
 const crypto = require('crypto');
 
 // Generate unique transaction ID
@@ -94,9 +94,38 @@ async function deletePayment(req, res) {
   }
 }
 
+async function getPaymentMethods(req, res) {
+  try {
+    const [rows] = await db.query(`
+      SHOW COLUMNS FROM orders LIKE 'payment_method'
+    `);
+
+    const enumStr = rows[0].Type; // e.g., enum('cash_on_delivery','mobile_money','card')
+
+    const values = enumStr
+      .replace("enum(", "")
+      .replace(")", "")
+      .split(",")
+      .map(v => v.replace(/'/g, ""));
+
+    return res.status(200).json({
+      success: true,
+      paymentMethods: values,
+    });
+  } catch (error) {
+    console.error('Error fetching payment methods:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to fetch payment methods',
+    });
+  }
+}
+
+
 module.exports = {
   createPayment,
   getPayments,
   getPaymentById,
-  deletePayment
+  deletePayment,
+getPaymentMethods
 };

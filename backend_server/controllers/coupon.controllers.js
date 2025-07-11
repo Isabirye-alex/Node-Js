@@ -1,4 +1,3 @@
-const Coupon = require('../models/coupon.model');
 const crypto = require('crypto');
 const db = require('./db.controller.js');
 

@@ -1,4 +1,5 @@
-const db = require('../controllers/db.controller.js');
+const db = require('./db.controller.js');
+
 
 // Create Order
 async function createOrder(req, res) {
@@ -62,7 +63,7 @@ async function createOrder(req, res) {
 async function getOrders(req, res) {
   try {
     const [orders] = await db.query(`
-      SELECT orders.*, users.name AS user_name
+      SELECT orders.*, users.firstName AS user_name
       FROM orders
       JOIN users ON orders.user_id = users.id
     `);
@@ -169,5 +170,6 @@ module.exports = {
   getOrders,
   getOrderById,
   updateOrder,
-  deleteOrder
+  deleteOrder,
+
 };

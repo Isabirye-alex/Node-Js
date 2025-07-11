@@ -1,61 +1,27 @@
-const Review = require('../models/review.model');
+const db = require('./db.controller.js');
 
-// Create Review
-async function createReview(req, res) {
-  try {
-    const { user, product, rating, comment } = req.body;
-
-    if (!user || !product || !rating || !comment) {
-      return res.status(400).json({ success: false, message: 'All fields are required' });
+async function postReview(req, res) {
+    try {
+        const { user_id, product_id, rating, comment } = req.body;
+        if (!user_id || !product_id || !rating || !comment) {
+            return res.status(409).json({ success: false, message: 'Required fields are missing' });
+        }
+        //Check if user has ever posted a review on that particular product
+        const [user] = await db.query(`SELECT * FROM reviews WHERE user_id = ?`, [user_id]);
+    
+        const [result] = await db.query('INSERT INTO reviews(user_id, product_id, rating, comment) VALUES(?,?,?,?)',
+            [user_id, product_id, rating, comment]);
+    
+        return res.status(201).json({ sucess: true, message: 'Review posted succesfully' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Could not post review', error: error.message });
     }
-    const review = new Review({ user, product, rating, comment });
-    await review.save();
-
-    res.status(201).json({ success: true, message: 'Review created successfully', data: review });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error creating review', error: error.message });
-  }
 }
 
-// Get All Reviews
-async function getReviews(req, res) {
-  try {
-    const reviews = await Review.find().populate('user').populate('product');
-    res.status(200).json({ success: true, data: reviews });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error fetching reviews' });
-  }
+async function editReview(req, res) {
+
 }
 
-// Get Review by ID
-async function getReviewById(req, res) {
-  try {
-    const { id } = req.params;
-    const review = await Review.findById(id).populate('user').populate('product');
-    if (!review) return res.status(404).json({ success: false, message: 'Review not found' });
-
-    res.status(200).json({ success: true, data: review });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error retrieving review' });
-  }
-}
-
-// Delete Review
 async function deleteReview(req, res) {
-  try {
-    const { id } = req.params;
-    const deleted = await Review.findByIdAndDelete(id);
-    if (!deleted) return res.status(404).json({ success: false, message: 'Review not found' });
-
-    res.status(200).json({ success: true, message: 'Review deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Error deleting review' });
-  }
+    
 }
-
-module.exports = {
-  createReview,
-  getReviews,
-  getReviewById,
-  deleteReview,
-};
