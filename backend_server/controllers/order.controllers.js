@@ -3,6 +3,8 @@ const db = require('./db.controller.js');
 
 // Create Order
 async function createOrder(req, res) {
+  const connection = await db.getConnection(); // Use a connection from pool
+
   try {
     const {
       user_id,
@@ -12,18 +14,22 @@ async function createOrder(req, res) {
       is_paid,
       paid_at,
       delivered_at,
-      status
+      status,
+      items, // <-- items from cart
     } = req.body;
 
-    // Basic validation
-    if (!user_id || !total_amount || !shipping_address || !payment_method) {
+    // Validate required fields
+    if (!user_id || !total_amount || !shipping_address || !payment_method || !Array.isArray(items)) {
       return res.status(400).json({
         success: false,
-        message: 'All required fields must be provided'
+        message: 'All required fields including items must be provided',
       });
     }
 
-    const [result] = await db.query(
+    await connection.beginTransaction();
+
+    // Insert order
+    const [orderResult] = await connection.query(
       `INSERT INTO orders 
         (user_id, total_amount, shipping_address, payment_method, is_paid, paid_at, delivered_at, status) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -35,27 +41,50 @@ async function createOrder(req, res) {
         is_paid || false,
         paid_at || null,
         delivered_at || null,
-        status || 'pending'
+        status || 'pending',
       ]
     );
 
+    const orderId = orderResult.insertId;
+
+    // Insert order items
+    for (const item of items) {
+      const { product_id, quantity, price } = item;
+
+      if (!product_id || !quantity || !price) {
+        await connection.rollback();
+        return res.status(400).json({ success: false, message: 'Invalid item format' });
+      }
+
+      await connection.query(
+        `INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)`,
+        [orderId, product_id, quantity, price]
+      );
+    }
+
+    await connection.query(
+  'UPDATE carts SET status = ? WHERE user_id = ? AND status = ?',
+  ['ordered', user_id, 'pending']
+);
+
+    await connection.commit();
+
     res.status(201).json({
       success: true,
-      message: 'Order created successfully',
+      message: 'Order and items saved successfully',
       data: {
-        id: result.insertId,
-        user_id,
-        total_amount,
-        shipping_address,
-        payment_method,
-        is_paid: is_paid || false,
-        paid_at: paid_at || null,
-        delivered_at: delivered_at || null,
-        status: status || 'pending'
-      }
+        order_id: orderId,
+      },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error creating order', error: error.message });
+    await connection.rollback();
+    res.status(500).json({
+      success: false,
+      message: 'Error creating order',
+      error: error.message,
+    });
+  } finally {
+    connection.release(); // release connection
   }
 }
 

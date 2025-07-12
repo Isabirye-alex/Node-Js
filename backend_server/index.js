@@ -32,7 +32,7 @@ const addressRoutes = require('./routes/address.routes.js');
 
 app.use('/categories', categoryRoutes);
 app.use('/subcategories', subCategoryRoutes);
-app.use('/addresses', addressRoutes); 
+app.use('/address', addressRoutes); 
 app.use('/products', productRoutes);
 app.use('/brands', brandRoutes);
 app.use('/coupons', couponRoutes);
@@ -42,7 +42,7 @@ app.use('/notifications', notificationRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/users', userRoutes);
 app.use('/cart', cartRoutes);
-app.use('/order', orderRoutes);
+app.use('/orders', orderRoutes);
 
 app.use('/cart-items', cartItemRoutes); // ✅ Now both work
 
