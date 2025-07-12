@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const {     createOrder,
     getOrders,
-    getOrderById,
+    getOrderByUserId,
+    getOrderItems,
     updateOrder,
     deleteOrder } = require('../controllers/order.controllers.js');
 
@@ -10,7 +11,8 @@ const {     createOrder,
 //Routes to handle all user funcions related to categories
 router.get('/', getOrders);    // GET /categories
 router.post('/', createOrder);
-router.get('/:id', getOrderById);
+router.get('/orderitems/:orderId', getOrderItems); // GET /categories/:id
+router.get('/user/:userId', getOrderByUserId);
 router.put('/:id', updateOrder);
 router.delete('/:id', deleteOrder);// POST /categories
 

@@ -83,20 +83,21 @@ async function getItemsByCartId(req, res) {
   try {
     const { cartId } = req.params;
 
-	const [items] = await db.query(
-  `SELECT 
-     ci.*, 
-     p.price, 
-     p.name AS title, 
-     p.imageUrl AS imageUrl 
-   FROM cart_items ci
-   JOIN products p ON ci.product_id = p.id
-   WHERE ci.cart_id = ?`,
-  [cartId]
-);
+    const [items] = await db.query(
+      `SELECT 
+         ci.*, 
+         p.price, 
+         p.name AS title, 
+         p.imageUrl AS imageUrl 
+       FROM cart_items ci
+       JOIN products p ON ci.product_id = p.id
+       JOIN carts c ON ci.cart_id = c.id
+       WHERE ci.cart_id = ? AND c.status = 'pending'`,
+      [cartId]
+    );
 
     if (items.length === 0) {
-      return res.status(404).json({ success: false, message: 'No items found for this cart' });
+      return res.status(404).json({ success: false, message: 'No pending cart items found' });
     }
 
     res.status(200).json({ success: true, data: items });
@@ -127,18 +128,34 @@ async function getActiveCart(req, res) {
   try {
     const { userId } = req.params;
 
+    if (!userId) {
+      return res.status(400).json({ success: false, message: 'User ID is required' });
+    }
+
     const [rows] = await db.query(
-      'SELECT id FROM carts WHERE user_id = ? AND status = "pending" ORDER BY created_at DESC LIMIT 1',
+      `SELECT id, total_price, status 
+       FROM carts 
+       WHERE user_id = ? AND status = 'pending' 
+       ORDER BY created_at DESC 
+       LIMIT 1`,
       [userId]
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: 'No items found for this cart' });
+      return res.status(404).json({ success: false, message: 'No active cart found' });
     }
 
-    res.status(200).json({ success: true, cart_id: rows[0].id });
+    res.status(200).json({
+      success: true,
+      message: 'Active cart retrieved',
+      data: rows[0] // includes id, total_price, status
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Error retrieving active cart', error: error.message });
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving active cart',
+      error: error.message
+    });
   }
 }
 
