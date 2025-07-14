@@ -3,7 +3,7 @@ const db = require('./db.controller.js');
 async function addAddress(req, res) { 
     try {
         const { user_id, address_line, district, region, country, postal_code } = req.body;
-        if (!user_id || !address_line || !district || !region || !country) {
+        if (!user_id || !address_line || !district || !region) {
             return res.status(400).json({ success: false, message: 'All fields are required' });
         }
 
