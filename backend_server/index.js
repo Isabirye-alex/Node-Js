@@ -29,6 +29,7 @@ const cartRoutes = require('./routes/cart.routes.js');
 const orderRoutes = require('./routes/order.routes.js');
 const cartItemRoutes = require('./routes/cart.items.routes.js');
 const addressRoutes = require('./routes/address.routes.js');
+const wishlistRoutes = require('./routes/wishlist.routes.js');
 
 app.use('/categories', categoryRoutes);
 app.use('/subcategories', subCategoryRoutes);
@@ -37,13 +38,13 @@ app.use('/products', productRoutes);
 app.use('/brands', brandRoutes);
 app.use('/coupons', couponRoutes);
 app.use('/admin', adminRoutes);
-// app.use('/review', reviewRoutes);
+ app.use('/review', reviewRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/payments', paymentRoutes);
 app.use('/users', userRoutes);
 app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
-
+app.user('/wishlist', wishlistRoutes);
 app.use('/cart-items', cartItemRoutes); // ✅ Now both work
 
 // Test root

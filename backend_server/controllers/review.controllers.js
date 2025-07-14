@@ -47,7 +47,7 @@ async function getReviews(req, res) {
         const page = 1;
         const limit = 10;
         const offset = (page - limit);
-        const { user_id } = req.body;
+        const { user_id } = req.params;
         const [response] = await db.query('(SELECT * FROM reviews WHERE user_id = ?) UNION ALL(SELECT * FROM reviews WHERE user_id!=? ORDER BY rating DESC LIMIT ? OFFSET)',
             [user_id, user_id, limit, offset]);
         const hasUserReview = response.length > 0 && response[0].user_id === user_id;

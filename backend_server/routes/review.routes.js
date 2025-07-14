@@ -7,9 +7,9 @@ const {   postReview,
 
 
 //Routes to handle all user funcions related to categories
-router.get('/', getReviews);    // GET /categories
-router.post('/', postReview);
-router.patch('/:id', editReview);
+router.get('/getreviews/:user_id', getReviews);    // GET /categories
+router.post('/postreview', postReview);
+router.patch('/updatereview/:id', editReview);
 router.delete('/:id', deleteReview);// POST /categories
 
 module.exports = router;
