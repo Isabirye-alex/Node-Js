@@ -20,7 +20,7 @@ const subCategoryRoutes = require('./routes/subCategory.routes.js');
 const productRoutes = require('./routes/product.routes.js');
 const brandRoutes = require('./routes/brand.routes.js');
 const adminRoutes = require('./routes/admin.routes.js');
-// const reviewRoutes = require('./routes/review.routes.js');
+ const reviewRoutes = require('./routes/review.routes.js');
 const couponRoutes = require('./routes/coupon.routes.js');
 const notificationRoutes = require('./routes/notification.routes.js');
 const paymentRoutes = require('./routes/payment.routes.js');
@@ -44,7 +44,7 @@ app.use('/payments', paymentRoutes);
 app.use('/users', userRoutes);
 app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
-app.user('/wishlist', wishlistRoutes);
+app.use('/wishlist', wishlistRoutes);
 app.use('/cart-items', cartItemRoutes); // ✅ Now both work
 
 // Test root

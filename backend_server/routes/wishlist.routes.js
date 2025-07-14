@@ -8,6 +8,6 @@ const {  deleteItemFromWishlist,
 //Routes to handle all user funcions related to categories
 router.get('/getitems/:user_id', getWishListItems);    // GET /categories
 router.post('/additem', createWishlist);
-router.delete('/removefromwishlist:id', deleteReview);// POST /categories
+router.delete('/removefromwishlist:id', deleteItemFromWishlist);// POST /categories
 
 module.exports = router;
