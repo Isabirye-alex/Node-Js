@@ -1,6 +1,5 @@
 const db = require('./db.controller.js');
 
-
 // Create Order
 async function createOrder(req, res) {
   const connection = await db.getConnection(); // Use a connection from pool
