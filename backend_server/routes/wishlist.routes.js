@@ -5,9 +5,8 @@ const {  deleteItemFromWishlist,
          getWishListItems} = require('../controllers/wishlist.controllers.js');
 
 
-//Routes to handle all user funcions related to categories
-router.get('/getitems/:user_id', getWishListItems);    // GET /categories
-router.post('/additem', createWishlist);
-router.delete('/removefromwishlist:id', deleteItemFromWishlist);// POST /categories
+router.get('/getitems/:user_id', getWishListItems);
+router.post('/additem/:user_id', createWishlist);
+router.delete('/removefromwishlist/:user_id', deleteItemFromWishlist);
 
 module.exports = router;

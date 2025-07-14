@@ -186,10 +186,45 @@ async function deleteProduct(req, res) {
   }
 }
 
+// Get Featured Products
+async function getFeaturedProducts(req, res) {
+  try {
+    const [products] = await db.query(`
+      SELECT
+        p.id, p.name, p.description, p.price, p.stock, p.imageUrl,
+        p.is_featured, p.brand,
+        c.id AS category_id, c.name AS categoryName,
+        s.id AS subcategory_id, s.name AS subcategoryName
+      FROM products p
+      JOIN categories c ON p.category_id = c.id
+      JOIN subcategories s ON p.subcategory_id = s.id
+      WHERE p.is_featured = 1
+    `);
+
+    if (products.length === 0) {
+      return res.status(404).json({ success: false, message: 'No featured products found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Featured products retrieved successfully',
+      data: products
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching featured products',
+      error: error.message
+    });
+  }
+}
+
+
 module.exports = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getFeaturedProducts
 };
