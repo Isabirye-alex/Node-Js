@@ -51,7 +51,7 @@ async function editReview(req, res) {
         }
         const [user] = await db.query('SELECT * FROM reviews WHERE user_id = ?', [user_id]);
         if (user) {
-            const [response] = await db.query('UPDATE reviews SET rating = ?, comment = ? WHERE user = ? and product_id=?', [rating, comment, user_id, product_id]);
+            const [response] = await db.query('UPDATE reviews SET rating = ?, comment = ? WHERE user_id = ? and product_id=?', [rating, comment, user_id, product_id]);
             return res.status(201).json({ sucess: true, message: 'Review updated successfully', data: response});
         }
     } catch (error) {

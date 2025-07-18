@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placement Email</title>
+    <style>
+        body{
+            margin: : 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f4f4;
+            color: #333333;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header{
+            background-color: #4a90e2;
+            padding: 20px;
+            text-align: center;
+
+        }
+        .header img {
+            max-width: 150px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .content h1 {
+            font-size: 24px;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4a90e2;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            margin: 20px 0;
+
+        }
+        .features {
+            margin: 20px, 0;
+        }
+        .feature-item {
+            margin-bottom: 15px;
+        }
+        .feature-item h3 {
+            font-size: 18px;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+        .footer {
+            background-color: #f4f4f4;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            columns: #666666;
+        }
+        .footer a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+        @media only screen and (max-width: 600px){
+            .container {
+                width: 100%;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .cta-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="" alt="Lexus Logo">
+
+        </div>
+        <div class="content">
+            <h1>Welcome, {{name}}</h1>
+            <p>Thank you for joining {{company}} We're thrilled to have you on board and csn't wait to help you explore all the amazing features our platform has to offer.'</p>
+            <p>At {{company}}, our mission is to empower you with tools to achieve your goals. Whether you're here to shop, recommend or browse, we're here to help you</p>
+
+        </div>
+        <div class="features">
+            <h2>Why choose us</h2>
+            <div class="feature-item">
+                <h3>Feature One</h3>
+            </div>
+        </div>
+        <div class="footer">
+            <p>{{year}} {{company}}. All rights reserved</p>
+            <p><a href="">Privacy Policy</a>|<a href="">Terms of service</a></p>
+            <p>Questions? Contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+        </div>
+    </div>
+</body>
+</html>

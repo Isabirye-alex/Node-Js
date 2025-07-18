@@ -30,6 +30,7 @@ const orderRoutes = require('./routes/order.routes.js');
 const cartItemRoutes = require('./routes/cart.items.routes.js');
 const addressRoutes = require('./routes/address.routes.js');
 const wishlistRoutes = require('./routes/wishlist.routes.js');
+const emailRoutes = require('./routes/mail.routes.js');
 
 app.use('/categories', categoryRoutes);
 app.use('/subcategories', subCategoryRoutes);
@@ -46,7 +47,7 @@ app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
 app.use('/wishlist', wishlistRoutes);
 app.use('/cart-items', cartItemRoutes); // ✅ Now both work
-
+app.use('/mailer', emailRoutes);
 // Test root
 app.get("/", (req, res) => {
   res.json("App is working Wonderfully");
