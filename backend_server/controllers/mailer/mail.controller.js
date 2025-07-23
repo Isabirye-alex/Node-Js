@@ -1,63 +1,67 @@
-const mailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 const hbs = require("nodemailer-express-handlebars");
 const path = require("path");
 
 async function sendEmail(req, res) {
   try {
-    const { supportEmail } = 'isabiryealexx@gmail.com';
+    const supportEmail = "isabiryealexx@gmail.com";
+    const company = "GoShop";
+    const website = ""; 
 
-    const transporter = mailer.createTransport({
-      host: 'smt.ethereal.email',
-      port: 587,
-      secure:false,
+    const { receiver, receiverName } = req.body;
+
+    const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: "mk5143195@gmail.com",
-        pass: "xnmvmpivkvjtmidp",
+        pass: "xnmvmpivkvjtmidp", 
       },
     });
-    const mailOptions = {
-      from: '"GoShop" mk5143195@gmail.com',
-      to: "7526878@gmail.com",
-      subject: "Your Order has been Received",
-      text: "That was easy",
-      template: 'order',
-      context: {
-        name,company,supportEmail, website, year: new Date().getFullYear()
-      },
-      
-    };
-    // Configure Handlebars
+
+    // Configure handlebars with correct paths
     transporter.use(
       "compile",
       hbs({
         viewEngine: {
           extname: ".hbs",
-          layoutsDir: "",
           defaultLayout: false,
-          partialsDir: path.resolve('./views/'),
-          layoutsDir:path.resolve('./views/')
+          partialsDir: path.resolve("./views/"),
         },
         viewPath: path.resolve("./views/"),
         extName: ".hbs",
       })
     );
 
-    transporter.sendMail(mailOptions, function (error, info) {
+    const mailOptions = {
+      from: `"${company}" <mk5143195@gmail.com>`,
+      to: receiver,
+      subject: "Your Order has been Received",
+      template: "order", 
+      context: {
+        receiverName,
+        company,
+        supportEmail,
+        website,
+        year: new Date().getFullYear(),
+      },
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
-        console.log("Unknown error occured:", error);
+        console.error("Error sending email:", error);
+        return res.status(500).json({ success: false, message: "Failed to send email", error: error.message });
       } else {
-        console.log("Email Sent:" + info.response);
+        console.log("Email sent: " + info.response);
+        return res.status(200).json({ success: true, message: "Email sent successfully" });
       }
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Failed to send email",
-        error: error.message,
-      });
+    console.error("Catch error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected error occurred",
+      error: error.message,
+    });
   }
 }
 
