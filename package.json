@@ -1,0 +1,34 @@
+{
+  "name": "backend_server",
+  "version": "1.0.0",
+  "main": "index.js",
+"scripts": {
+  "start": "node index.js",
+  "dev": "nodemon index.js",
+  "test": "echo \"Error: no test specified\" && exit 1"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cloudinary": "^1.30.0",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.6.0",
+    "express": "^5.1.0",
+    "express-async-handler": "^1.2.0",
+    "g": "^2.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongo": "^0.1.0",
+    "mongoose": "^8.16.0",
+    "multer": "^2.0.1",
+    "multer-storage-cloudinary": "^4.0.0",
+    "mysql2": "^3.14.1",
+    "nodemailer": "^7.0.5",
+    "nodemailer-express-handlebars": "^7.0.0",
+    "nodeman": "^1.1.2",
+    "nodemon": "^3.1.10"
+  }
+}
