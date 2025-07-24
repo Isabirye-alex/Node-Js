@@ -5,7 +5,7 @@ const router = express.Router();
 const controller = require('../controllers/cart.items.controllers.js');
 
 // DEBUG: Log what’s actually being imported
-console.log('Controller:', controller);
+// console.log('Controller:', controller);
 
 const { addItemToCart, getItemsByCartId, removeItemFromCart, getActiveCart,decreaseCartItemQuantity} = controller;
 

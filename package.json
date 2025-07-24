@@ -2,11 +2,11 @@
   "name": "backend_server",
   "version": "1.0.0",
   "main": "index.js",
-"scripts": {
-  "start": "node index.js",
-  "dev": "nodemon index.js",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -27,7 +27,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "mysql2": "^3.14.1",
     "nodemailer": "^7.0.5",
-    "nodemailer-express-handlebars": "^7.0.0",
+    "nodemailer-express-handlebars": "^4.0.0",
     "nodeman": "^1.1.2",
     "nodemon": "^3.1.10"
   }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Order Placement Email</title>
+    <title>Welcome to {{company}}</title>
     <style>
         body {
             margin: 0;
@@ -27,11 +27,14 @@
         .header {
             background-color: #4a90e2;
             padding: 20px;
-            text-align: center;
+            text-align: left;
         }
 
         .header img {
-            max-width: 150px;
+            max-width: 80px;
+            height: auto;
+            display: inline-block;
+            vertical-align: middle;
         }
 
         .content {
@@ -48,17 +51,6 @@
             font-size: 16px;
             line-height: 1.6;
             margin-bottom: 15px;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #4a90e2;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 16px;
-            margin: 20px 0;
         }
 
         .features {
@@ -99,11 +91,6 @@
             .content {
                 padding: 20px;
             }
-
-            .cta-button {
-                width: 100%;
-                text-align: center;
-            }
         }
     </style>
 </head>
@@ -111,26 +98,49 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://yourdomain.com/logo.png" alt="{{company}} Logo" />
+            <img src="https://res.cloudinary.com/doxivkfxr/image/upload/v1752589145/products/flohmuz6lgwucmb0w3i8.jpg"
+                alt="{{company}} Logo" />
         </div>
+
         <div class="content">
-            <h1>Welcome, {{receiverName}}</h1>
-            <p>Thank you for joining {{company}}. We're thrilled to have you on board and can't wait to help you explore
-                all the amazing features our platform has to offer.</p>
-            <p>At {{company}}, our mission is to empower you with tools to achieve your goals. Whether you're here to
-                shop, recommend, or browse, we're here to help you.</p>
+            <h1>Welcome, {{receiverName}}!</h1>
+            <p>We're excited to welcome you to <strong>{{company}}</strong>. You're now part of a growing community
+                that's transforming the way people shop online.</p>
+            <p>From trending products to unbeatable offers, we've got everything you need. Dive in and discover your
+                next favorite item!</p>
         </div>
+
         <div class="features">
             <h2>Why Choose Us</h2>
             <div class="feature-item">
-                <h3>Feature One</h3>
-                <p>High quality products, fast delivery, and unbeatable customer service.</p>
+                <h3>Top-Quality Products</h3>
+                <p>Carefully selected, high-quality items across categories delivered to your door.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Fast Shipping</h3>
+                <p>We process and ship orders quickly so you can enjoy your purchases sooner.</p>
+            </div>
+            <div class="feature-item">
+                <h3>Excellent Support</h3>
+                <p>Got questions? Our support team is always here for you.</p>
             </div>
         </div>
+
         <div class="footer">
-            <p>&copy; {{year}} {{company}}. All rights reserved.</p>
-            <p><a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
-            <p>Questions? Contact us at <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4; padding: 20px;">
+                <tr>
+                    <td align="center" style="font-size: 14px; color: #444444; font-family: Arial, sans-serif;">
+                        <p style="margin: 0;">&copy; {{year}} {{company}}. All rights reserved.</p>
+                        <p style="margin: 5px 0;">
+                            <a href="#" style="color: #4a90e2; text-decoration: none;">Privacy Policy</a> |
+                            <a href="#" style="color: #4a90e2; text-decoration: none;">Terms of Service</a>
+                        </p>
+                        <p style="margin: 5px 0;">Need help? <a href="mailto:{{supportEmail}}"
+                                style="color: #4a90e2;">{{supportEmail}}</a></p>
+                    </td>
+                </tr>
+            </table>
+
         </div>
     </div>
 </body>
