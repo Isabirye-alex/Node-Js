@@ -18,7 +18,6 @@ async function sendEmail(req, res) {
       },
     });
 
-    // Configure handlebars with correct paths
     transporter.use(
       "compile",
       hbs({
