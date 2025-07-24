@@ -52,7 +52,7 @@ async function sendWelcomeEmail(req, res) {
         return res.status(500).json({ success: false, message: "Failed to send email", error: error.message });
       } else {
         console.log("Email sent: " + info.response);
-        return res.status(200).json({ success: true, message: "Email sent successfully" });
+        return res.status(200).json({ success: true, message: "Email sent successfully"});
       }
     });
   } catch (error) {
@@ -69,9 +69,18 @@ async function sendOrderEmail(req, res) {
   try {
     const supportEmail = "isabiryealexx@gmail.com";
     const company = "XShop";
-    const website = "";
+    const website = "https://xshop.com"; // Your live URL
 
-    const { receiver, receiverName, orderItems, total } = req.body;
+    const {
+      receiver,
+      receiverName,
+      orderId,
+      orderDate,
+      paymentMethod,
+      shippingAddress,
+      orderItems,
+      total
+    } = req.body;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -81,30 +90,31 @@ async function sendOrderEmail(req, res) {
       },
     });
 
-    transporter.use(
-      "compile",
-      hbs({
-        viewEngine: {
-          extname: ".hbs",
-          defaultLayout: false,
-          partialsDir: path.resolve("./views/"),
-        },
-        viewPath: path.resolve("./views/"),
-        extName: ".hbs",
-      })
-    );
+    transporter.use("compile", hbs({
+      viewEngine: {
+        extname: ".hbs",
+        defaultLayout: false,
+        partialsDir: path.resolve("./views/"),
+      },
+      viewPath: path.resolve("./views/"),
+      extName: ".hbs",
+    }));
 
     const mailOptions = {
       from: `"${company}" <mk5143195@gmail.com>`,
       to: receiver,
-      subject: "Your Order Confirmation - XShop",
-      template: "order", 
+      subject: `Order Received – ${company}`,
+      template: "order",
       context: {
         receiverName,
         company,
         supportEmail,
         website,
         year: new Date().getFullYear(),
+        orderId,
+        orderDate,
+        paymentMethod,
+        shippingAddress,
         orderItems,
         total,
       },
@@ -116,6 +126,16 @@ async function sendOrderEmail(req, res) {
         return res.status(500).json({ success: false, message: "Failed to send email", error: error.message });
       } else {
         console.log("Email sent: " + info.response);
+console.log({
+  receiverName,
+  orderId,
+  orderDate,
+  paymentMethod,
+  shippingAddress,
+  orderItems,
+  total,
+});
+
         return res.status(200).json({ success: true, message: "Order email sent successfully" });
       }
     });

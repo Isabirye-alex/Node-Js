@@ -1,11 +1,11 @@
 const mysql = require('mysql2');
 
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'root',
-  port: 3308,
-  database: 'easy_mall',
+  host: 'mysql-lexus-xshop.k.aivencloud.com',
+  user: 'avnadmin',
+  password: 'AVNS_TcIdKQ4M2YGw2nO2-W1',
+  port: 26667,
+  database: 'defaultdb',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -15,3 +15,9 @@ const pool = mysql.createPool({
 const db = pool.promise();
 
 module.exports = db;
+
+
+//host = mysql-lexus-xshop.k.aivencloud.com
+//user = avnadmin
+//password = AVNS_TcIdKQ4M2YGw2nO2-W1
+//port = 26667
