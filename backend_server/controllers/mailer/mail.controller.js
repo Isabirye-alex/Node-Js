@@ -14,7 +14,7 @@ async function sendEmail(req, res) {
       service: "gmail",
       auth: {
         user: "mk5143195@gmail.com",
-        pass: "xnmvmpivkvjtmidp", 
+        pass: process.env.GMAIL_PASSWORD, 
       },
     });
 
