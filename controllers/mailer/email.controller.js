@@ -65,6 +65,73 @@ async function sendWelcomeEmail(req, res) {
   }
 }
 
+
+async function sendTestEmail(req, res) {
+  try {
+    const supportEmail = "support@yourdomain.com"; // change to your support email
+    const company = "XShop";
+    const website = "https://yourdomain.com"; // your actual website
+
+    const { receiver, receiverName } = req.body;
+
+    // Replace with your actual Hostinger email and SMTP credentials
+    const transporter = nodemailer.createTransport({
+      host: "smtp.hostinger.com",
+      port: 465, // Use 587 if SSL doesn't work
+      secure: true, // Use true for port 465, false for 587
+      auth: {
+        user: "alex.isabirye@pearl-host.com", // your Hostinger email
+        pass: "0752687851@Al",
+      },
+    });
+
+    transporter.use(
+      "compile",
+      hbs({
+        viewEngine: {
+          extname: ".hbs",
+          defaultLayout: false,
+          partialsDir: path.resolve("./views/"),
+        },
+        viewPath: path.resolve("./views/"),
+        extName: ".hbs",
+      })
+    );
+
+    const mailOptions = {
+      from: `"${company}" <alex.isabirye@pearl-host.com>`, // Hostinger email here
+      to: receiver,
+      subject: "Account Activated ✅ Ready to Explore",
+      template: "welcome",
+      context: {
+        receiverName,
+        company,
+        supportEmail,
+        website,
+        year: new Date().getFullYear(),
+      },
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Error sending email:", error);
+        return res.status(500).json({ success: false, message: "Failed to send email", error: error.message });
+      } else {
+        console.log("Email sent: " + info.response);
+        return res.status(200).json({ success: true, message: "Email sent successfully" });
+      }
+    });
+  } catch (error) {
+    console.error("Catch error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unexpected error occurred",
+      error: error.message,
+    });
+  }
+}
+
+
 async function sendOrderEmail(req, res) {
   try {
     const supportEmail = "isabiryealexx@gmail.com";
@@ -152,5 +219,6 @@ console.log({
 
 module.exports = {
   sendWelcomeEmail,
-  sendOrderEmail
+  sendOrderEmail,
+  sendTestEmail
 };

@@ -52,7 +52,9 @@ async function createProduct(req, res) {
 // Get all Products
 async function getAllProducts(req, res) {
   try {
-    const { category_id, subcategory_id } = req.query;
+    const { category_id, subcategory_id, page = 1, limit = 20 } = req.query;
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
     let sql = `
       SELECT 
@@ -77,16 +79,20 @@ async function getAllProducts(req, res) {
       params.push(subcategory_id);
     }
 
-    const [products] = await db.query(sql, params);
+    sql += ' LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), offset);
 
-    if (products.length === 0) {
-      return res.status(404).json({ success: false, message: 'No products found' });
-    }
+    const [products] = await db.query(sql, params);
 
     res.status(200).json({
       success: true,
       message: 'Products retrieved successfully',
-      data: products
+      data: products,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        count: products.length,
+      },
     });
 
   } catch (error) {
