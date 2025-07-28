@@ -68,7 +68,7 @@ async function sendWelcomeEmail(req, res) {
 
 async function sendTestEmail(req, res) {
   try {
-    const supportEmail = "support@yourdomain.com"; // change to your support email
+    const supportEmail = "alex.isabirye@pearl-host.com"; // change to your support email
     const company = "XShop";
     const website = "https://yourdomain.com"; // your actual website
 
