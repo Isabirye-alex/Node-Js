@@ -134,9 +134,9 @@ async function sendTestEmail(req, res) {
 
 async function sendOrderEmail(req, res) {
   try {
-    const supportEmail = "isabiryealexx@gmail.com";
+    const supportEmail = "alex.isabirye@pearl-host.com";
     const company = "XShop";
-    const website = "https://xshop.com"; // Your live URL
+    const website = "https://lex.pearl-host.com"; // Your live URL
 
     const {
       receiver,
@@ -150,10 +150,10 @@ async function sendOrderEmail(req, res) {
     } = req.body;
 
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: "smtp.hostinger.com",
       auth: {
-        user: "mk5143195@gmail.com",
-        pass: "xnmvmpivkvjtmidp",
+        user: "alex.isabirye@pearl-host.com",
+        pass: "0752687851@Al",
       },
     });
 
@@ -170,6 +170,7 @@ async function sendOrderEmail(req, res) {
     const mailOptions = {
       from: `"${company}" <mk5143195@gmail.com>`,
       to: receiver,
+      replyTo: 'alex.isabirye@pearl-host.com',
       subject: `Order Received – ${company}`,
       template: "order",
       context: {

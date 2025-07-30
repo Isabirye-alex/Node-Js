@@ -5,7 +5,7 @@ dotenv.config();
 const cors = require('cors');
 
 
-const db = require('./controllers/db.controller.js'); // Only used for queries
+const db = require('./controllers/db.controller.js'); 
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -46,7 +46,7 @@ app.use('/users', userRoutes);
 app.use('/cart', cartRoutes);
 app.use('/orders', orderRoutes);
 app.use('/wishlist', wishlistRoutes);
-app.use('/cart-items', cartItemRoutes); // ✅ Now both work
+app.use('/cart-items', cartItemRoutes); 
 app.use('/email', emailRoutes);
 // Test root
 app.get("/", (req, res) => {
