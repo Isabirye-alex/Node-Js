@@ -161,5 +161,4 @@ console.log({
 module.exports = {
   sendWelcomeEmail,
   sendOrderEmail,
-  sendTestEmail
 };
