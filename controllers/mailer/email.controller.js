@@ -108,7 +108,7 @@ async function sendOrderEmail(req, res) {
     }));
 
     const mailOptions = {
-      from: `"${company}" <mk5143195@gmail.com>`,
+      from: `"${company}" <alex.isabirye@pearl-host.com>`,
       to: receiver,
       replyTo: 'alex.isabirye@pearl-host.com',
       subject: `Order Received – ${company}`,
