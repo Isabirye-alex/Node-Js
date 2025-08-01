@@ -6,19 +6,16 @@ const path = require("path");
 
 async function sendWelcomeEmail(req, res) {
   try {
-    const supportEmail = "alex.isabirye@pearl-host.com"; // change to your support email
+    const supportEmail = "alex.isabirye@pearl-host.com"; 
     const company = "XShop";
-    const website = "https://yourdomain.com"; // your actual website
-
+    const website = "https://yourdomain.com"; 
     const { receiver, receiverName } = req.body;
-
-    // Replace with your actual Hostinger email and SMTP credentials
     const transporter = nodemailer.createTransport({
       host: "smtp.hostinger.com",
-      port: 465, // Use 587 if SSL doesn't work
-      secure: true, // Use true for port 465, false for 587
+      port: 465, 
+      secure: true,
       auth: {
-        user: "alex.isabirye@pearl-host.com", // your Hostinger email
+        user: "alex.isabirye@pearl-host.com", 
         pass: "0752687851@Al",
       },
     });
@@ -37,9 +34,10 @@ async function sendWelcomeEmail(req, res) {
     );
 
     const mailOptions = {
-      from: `"${company}" <alex.isabirye@pearl-host.com>`, // Hostinger email here
+      from: `"${company}" <alex.isabirye@pearl-host.com>`, 
       to: receiver,
-      subject: "Account Activated ✅ Ready to Explore",
+      replyTo:'alex.isabirye@pearl-host.com',
+      subject: "Account Activated Ready to Explore",
       template: "welcome",
       context: {
         receiverName,
@@ -74,7 +72,7 @@ async function sendOrderEmail(req, res) {
   try {
     const supportEmail = "alex.isabirye@pearl-host.com";
     const company = "XShop";
-    const website = "https://lex.pearl-host.com"; // Your live URL
+    const website = "https://lex.pearl-host.com"; 
 
     const {
       receiver,
@@ -89,10 +87,10 @@ async function sendOrderEmail(req, res) {
 
     const transporter = nodemailer.createTransport({
       host: "smtp.hostinger.com",
-      port: 465, // Use 587 if SSL doesn't work
-      secure: true, // Use true for port 465, false for 587
+      port: 465, 
+      secure: true, 
       auth: {
-        user: "alex.isabirye@pearl-host.com", // your Hostinger email
+        user: "alex.isabirye@pearl-host.com", 
         pass: "0752687851@Al",
       },
     });
@@ -113,6 +111,7 @@ async function sendOrderEmail(req, res) {
       replyTo: 'alex.isabirye@pearl-host.com',
       subject: `Order Received – ${company}`,
       template: "order",
+
       context: {
         receiverName,
         company,

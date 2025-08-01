@@ -79,7 +79,8 @@ async function getAllProducts(req, res) {
       params.push(subcategory_id);
     }
 
-    sql += ' LIMIT ? OFFSET ?';
+    // Add ORDER BY clause before LIMIT
+    sql += ' ORDER BY p.name ASC LIMIT ? OFFSET ?';
     params.push(parseInt(limit), offset);
 
     const [products] = await db.query(sql, params);
@@ -205,6 +206,7 @@ async function getFeaturedProducts(req, res) {
       JOIN categories c ON p.category_id = c.id
       JOIN subcategories s ON p.subcategory_id = s.id
       WHERE p.is_featured = 1
+      ORDER BY p.name ASC
     `);
 
     if (products.length === 0) {
