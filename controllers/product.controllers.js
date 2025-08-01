@@ -52,9 +52,7 @@ async function createProduct(req, res) {
 // Get all Products
 async function getAllProducts(req, res) {
   try {
-    const { category_id, subcategory_id, page = 1, limit = 20 } = req.query;
-
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const { category_id, subcategory_id } = req.query;
 
     let sql = `
       SELECT 
@@ -79,9 +77,8 @@ async function getAllProducts(req, res) {
       params.push(subcategory_id);
     }
 
-    // Add ORDER BY clause before LIMIT
-    sql += ' ORDER BY p.name ASC LIMIT ? OFFSET ?';
-    params.push(parseInt(limit), offset);
+    // Only order by name, no LIMIT/OFFSET
+    sql += ' ORDER BY p.name ASC';
 
     const [products] = await db.query(sql, params);
 
@@ -89,11 +86,7 @@ async function getAllProducts(req, res) {
       success: true,
       message: 'Products retrieved successfully',
       data: products,
-      pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
-        count: products.length,
-      },
+      count: products.length,
     });
 
   } catch (error) {
