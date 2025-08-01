@@ -171,32 +171,30 @@ async function getOrderByUserId(req, res) {
 async function updateOrder(req, res) {
   try {
     const { id } = req.params;
-    const {
-      total_amount,
-      status,
-      shipping_address,
-      payment_method,
-      is_paid,
-      paid_at,
-      delivered_at
-    } = req.body;
+    const fields = [];
+    const values = [];
 
-    const [result] = await db.query(
-      `UPDATE orders 
-       SET total_amount = ?, status = ?, shipping_address = ?, 
-           payment_method = ?, is_paid = ?, paid_at = ?, delivered_at = ?
-       WHERE id = ?`,
-      [
-        total_amount,
-        status,
-        shipping_address,
-        payment_method,
-        is_paid,
-        paid_at,
-        delivered_at,
-        id
-      ]
-    );
+    // Dynamically build the SET clause
+    const allowedFields = [
+      'total_amount', 'status', 'shipping_address',
+      'payment_method', 'is_paid', 'paid_at', 'delivered_at'
+    ];
+
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        fields.push(`${field} = ?`);
+        values.push(req.body[field]);
+      }
+    });
+
+    if (fields.length === 0) {
+      return res.status(400).json({ success: false, message: 'No valid fields to update' });
+    }
+
+    const query = `UPDATE orders SET ${fields.join(', ')} WHERE id = ?`;
+    values.push(id);
+
+    const [result] = await db.query(query, values);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: 'Order not found' });
