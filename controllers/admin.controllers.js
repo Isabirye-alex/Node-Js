@@ -27,7 +27,17 @@ async function createAdmin(req, res) {
     );
 
 
-    res.status(201).json({ success: true, message: 'Admin account successfully created' });
+    res.status(201).json({
+      success: true, message: 'Admin account successfully created', admin: {
+        id: admin.id,
+        
+        email: admin.email,
+        username: admin.username,
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+        
+      }
+    });
 
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to register admin', error: error.message });
@@ -69,7 +79,9 @@ async function adminLogin(req, res) {
         fullName: admin.fullName,
         email: admin.email,
         username: admin.username,
-        imageUrl: admin.imageUrl
+        firstName: admin.firstName,
+        lastName: admin.lastName,
+       
       }
     });
 
