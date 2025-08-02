@@ -1,4 +1,4 @@
-const db = require('../controllers/db.controller.js'); 
+const db = require('../controllers/db.controller.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -7,7 +7,7 @@ async function createAdmin(req, res) {
   try {
     const { firstName, lastName, email, username, password } = req.body;
     const imageUrl = req.file?.path; // Optional image upload
-    if (!firstName || !lastName||!email || !username || !password) {
+    if (!firstName || !lastName || !email || !username || !password) {
       return res.status(400).json({ success: false, message: 'All fields except image are required' });
     }
 
@@ -21,11 +21,11 @@ async function createAdmin(req, res) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     await db.query(
-      'INSERT INTO admin (firstName, lastName, email, username, password, imageUrl) VALUES (?, ?, ?,?, ?, ?)',
-      [firstName,lastName, email, username, imageUrl,hashedPassword|| null]
+      'INSERT INTO admin (firstName, lastName, email, username, password) VALUES (?, ?, ?, ?, ?)',
+      [firstName, lastName, email, username, hashedPassword]
     );
+
 
     res.status(201).json({ success: true, message: 'Admin account successfully created' });
 
@@ -83,7 +83,7 @@ async function getAdmins(req, res) {
   try {
     const [admins] = await db.query('SELECT * FROM admin');
     if (![admins] > 0) {
-      res.status(404).json({success:false, message:'No admins found'})
+      res.status(404).json({ success: false, message: 'No admins found' })
     }
     res.status(200).json({ success: true, data: admins });
   } catch (error) {
