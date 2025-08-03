@@ -220,6 +220,45 @@ async function getFeaturedProducts(req, res) {
   }
 }
 
+// Search Products by name or description
+async function searchProducts(req, res) {
+  try {
+    const { query } = req.query;
+
+    if (!query || query.trim() === '') {
+      return res.status(400).json({ success: false, message: 'Search query is required' });
+    }
+
+    const searchTerm = `%${query.trim()}%`;
+
+    const [results] = await db.query(`
+      SELECT 
+        p.id, p.name, p.description, p.price, p.stock, p.imageUrl,
+        p.is_featured, p.brand,
+        c.id AS category_id, c.name AS categoryName,
+        s.id AS subcategory_id, s.name AS subcategoryName
+      FROM products p
+      JOIN categories c ON p.category_id = c.id
+      JOIN subcategories s ON p.subcategory_id = s.id
+      WHERE p.name LIKE ? OR p.description LIKE ?
+      ORDER BY p.name ASC
+    `, [searchTerm, searchTerm]);
+
+    res.status(200).json({
+      success: true,
+      message: `Found ${results.length} matching product(s)`,
+      data: results
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error searching products',
+      error: error.message
+    });
+  }
+}
+
 
 module.exports = {
   createProduct,
@@ -227,5 +266,6 @@ module.exports = {
   getProductById,
   updateProduct,
   deleteProduct,
-  getFeaturedProducts
+  getFeaturedProducts,
+  searchProducts
 };
