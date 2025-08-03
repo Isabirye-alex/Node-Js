@@ -54,4 +54,7 @@ const getVendorRoles = async (req, res) => {
     }
 };
 
-
+module.exports = {
+    assignVendorRole,
+    getVendorRoles
+}

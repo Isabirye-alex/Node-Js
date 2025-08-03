@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {addNewVendor, vendorLogin, deleteVendor,getAllVendors,getVendorById } = require('../controllers/vendor.controllers.js');
-
+const { assignVendorRole, getVendorRoles } = require('../controllers/vendor.roles.controllers.js');
 // Register admin
 router.post('/add-vendor', addNewVendor);
 
