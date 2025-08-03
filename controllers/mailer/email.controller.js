@@ -68,6 +68,73 @@ async function sendWelcomeEmail(req, res) {
 }
 
 
+async function sendVendorWelcomeEmail({ receiver, receiverName, email, password }) {
+  const supportEmail = "alex.isabirye@pearl-host.com";
+  const company = "XShop";
+  const website = "https://yourdomain.com";
+
+  try {
+    // Configure mail transport
+    const transporter = nodemailer.createTransport({
+      host: "smtp.hostinger.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: "alex.isabirye@pearl-host.com",
+        pass: "0752687851@Al",
+      },
+    });
+
+    // Register handlebars template engine
+    transporter.use(
+      "compile",
+      hbs({
+        viewEngine: {
+          extname: ".hbs",
+          defaultLayout: false,
+          partialsDir: path.resolve("./views/"),
+        },
+        viewPath: path.resolve("./views/"),
+        extName: ".hbs",
+      })
+    );
+
+    // Define email options
+    const mailOptions = {
+      from: `"${company}" <alex.isabirye@pearl-host.com>`,
+      to: receiver,
+      replyTo: supportEmail,
+      subject: "Welcome to XShop! Your Vendor Account Details",
+      template: "new.vendor", // your handlebars template name (welcome.hbs)
+      context: {
+        receiverName,
+        company,
+        supportEmail,
+        website,
+        year: new Date().getFullYear(),
+        email,
+        password, // plaintext password included in the email
+      },
+    };
+
+    // Send email and return a promise
+    return new Promise((resolve, reject) => {
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+          reject(error);
+        } else {
+          console.log("Email sent: " + info.response);
+          resolve(info);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Unexpected error in sendWelcomeEmail:", error);
+    throw error;
+  }
+}
+
 async function sendOrderEmail(req, res) {
   try {
     const supportEmail = "alex.isabirye@pearl-host.com";
@@ -160,4 +227,5 @@ console.log({
 module.exports = {
   sendWelcomeEmail,
   sendOrderEmail,
+  sendVendorWelcomeEmail
 };

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to {{company}}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f4f4f4;
+      color: #333333;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+      background-color: #4a90e2;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .header img {
+      max-width: 80px;
+      height: auto;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .content h1 {
+      font-size: 24px;
+      color: #333333;
+      margin-bottom: 20px;
+    }
+
+    .content p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .credentials {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 6px;
+    }
+
+    .credentials p {
+      margin: 5px 0;
+      font-weight: bold;
+    }
+
+    .footer {
+      background-color: #f4f4f4;
+      padding: 20px;
+      text-align: center;
+      font-size: 14px;
+      color: #666666;
+    }
+
+    .footer a {
+      color: #4a90e2;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .container {
+        width: 100%;
+        border-radius: 0;
+      }
+
+      .content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://res.cloudinary.com/doxivkfxr/image/upload/v1752589145/products/flohmuz6lgwucmb0w3i8.jpg"
+        alt="{{company}} Logo" />
+    </div>
+
+    <div class="content">
+      <h1>Hello {{receiverName}},</h1>
+      <p>Welcome to <strong>{{company}}</strong>! Your vendor account has been successfully created.</p>
+      <p>You can now log in and start listing your products on our platform.</p>
+
+      <div class="credentials">
+        <p>📧 Email: <span style="font-weight: normal;">{{email}}</span></p>
+        <p>🔑 Temporary Password: <span style="font-weight: normal;">{{password}}</span></p>
+      </div>
+
+      <p>We recommend changing your password after your first login for better security.</p>
+      <p>Ready to get started? <a href="{{loginUrl}}" style="color: #4a90e2;">Log in to your account</a>.</p>
+    </div>
+
+    <div class="footer">
+      <p style="margin: 0;">&copy; {{year}} {{company}}. All rights reserved.</p>
+      <p style="margin: 5px 0;">
+        <a href="#">Privacy Policy</a> |
+        <a href="#">Terms of Service</a>
+      </p>
+      <p style="margin: 5px 0;">Need help? <a href="mailto:{{supportEmail}}">{{supportEmail}}</a></p>
+    </div>
+  </div>
+</body>
+
+</html>
