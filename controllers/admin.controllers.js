@@ -30,7 +30,6 @@ async function createAdmin(req, res) {
     res.status(201).json({
       success: true, message: 'Admin account successfully created', admin: {
         id: admin.id,
-        
         email: admin.email,
         username: admin.username,
         firstName: admin.firstName,
