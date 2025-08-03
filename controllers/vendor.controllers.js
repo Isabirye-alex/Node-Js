@@ -37,7 +37,6 @@ async function addNewVendor(req, res) {
             email,
             password, // plaintext password to include in email
         });
-
         // Only after email is sent successfully, send response
         res.status(201).json({
             success: true,
