@@ -31,6 +31,7 @@ const cartItemRoutes = require('./routes/cart.items.routes.js');
 const addressRoutes = require('./routes/address.routes.js');
 const wishlistRoutes = require('./routes/wishlist.routes.js');
 const emailRoutes = require('./routes/email.routes.js');
+const vendorRoutes = require('./routes/vendor.routes.js');
 
 app.use('/categories', categoryRoutes);
 app.use('/subcategories', subCategoryRoutes);
@@ -48,6 +49,7 @@ app.use('/orders', orderRoutes);
 app.use('/wishlist', wishlistRoutes);
 app.use('/cart-items', cartItemRoutes); 
 app.use('/email', emailRoutes);
+app.use('/vendors', vendorRoutes);
 // Test root
 app.get("/", (req, res) => {
   res.json("App is working Wonderfully");

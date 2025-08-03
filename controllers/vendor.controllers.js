@@ -104,8 +104,39 @@ async function deleteVendor(req, res) {
     }
 }
 
+async function getVendorById(req, res) {
+    try {
+        const { id } = req.params;
+
+        const [vendor] = await db.query('SELECT id, first_name, last_name, email, phone_number, product_categories FROM vendors WHERE id = ?', [id]);
+
+        if (vendor.length === 0) {
+            return res.status(404).json({ success: false, message: 'Vendor not found' });
+        }
+
+        return res.status(200).json({ success: true, vendor: vendor[0] });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error fetching vendor', error: error.message });
+    }
+}
+
+async function getAllVendors(req, res) {
+    try {
+        const [vendors] = await db.query('SELECT id, first_name, last_name, email, phone_number, product_categories FROM vendors');
+
+        return res.status(200).json({ success: true, vendors });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error fetching vendors', error: error.message });
+    }
+}
+
+
 module.exports = {
     addNewVendor,
     vendorLogin,
     deleteVendor,
+    getVendorById,
+    getAllVendors
 };
