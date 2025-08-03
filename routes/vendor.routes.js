@@ -17,4 +17,9 @@ router.get('/get-vendor:id', getVendorById);
 // Delete admin by ID
 router.delete('/:id', deleteVendor);
 
+//Vendor roles routes
+router.post("/:vendorId/roles", assignVendorRole);
+router.get("/:vendorId/roles", getVendorRoles);
+
+
 module.exports = router;
