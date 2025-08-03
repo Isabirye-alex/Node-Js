@@ -1,22 +1,22 @@
 const db = require('../controllers/db.controller.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-
+const { sendVendorWelcomeEmail } = require('../controllers/mailer/email.controller.js');
 async function addNewVendor(req, res) {
     try {
         const { first_name, last_name, email, phone_number, product_categories, password } = req.body;
 
         if (!first_name || !last_name || !email || !phone_number || !product_categories || !password) {
-            return res.status(409).json({ success: false, message: 'Required fields missing' });
+            return res.status(409).json({ success: false, message: "Required fields missing" });
         }
 
         const [existing_vendor] = await db.query(
-            'SELECT * FROM vendors WHERE email = ? OR phone_number = ?',
+            "SELECT * FROM vendors WHERE email = ? OR phone_number = ?",
             [email, phone_number]
         );
 
         if (existing_vendor.length > 0) {
-            return res.status(409).json({ success: false, message: 'Vendor already exists' });
+            return res.status(409).json({ success: false, message: "Vendor already exists" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -25,15 +25,23 @@ async function addNewVendor(req, res) {
             ? product_categories.join(",")
             : product_categories;
 
-
         const [insertResult] = await db.query(
-            'INSERT INTO vendors (first_name, last_name, email, phone_number, product_categories, password) VALUES (?, ?, ?, ?, ?, ?)',
+            "INSERT INTO vendors (first_name, last_name, email, phone_number, product_categories, password) VALUES (?, ?, ?, ?, ?, ?)",
             [first_name, last_name, email, phone_number, categories, hashedPassword]
         );
 
+        // Send welcome email before responding
+        await sendVendorWelcomeEmail({
+            receiver: email,
+            receiverName: `${first_name} ${last_name}`,
+            email,
+            password, // plaintext password to include in email
+        });
+
+        // Only after email is sent successfully, send response
         res.status(201).json({
             success: true,
-            message: 'New vendor added successfully',
+            message: "New vendor added successfully and welcome email sent",
             vendor: {
                 id: insertResult.insertId,
                 first_name,
@@ -45,10 +53,10 @@ async function addNewVendor(req, res) {
         });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: 'Error creating new vendor', error: error.message });
+        res.status(500).json({ success: false, message: "Error creating new vendor", error: error.message });
     }
 }
-
+  
 async function vendorLogin(req, res) {
     try {
         const { email, password } = req.body;
