@@ -54,7 +54,17 @@ const getVendorRoles = async (req, res) => {
     }
 };
 
+const getAllVendorRoles = async (req, res) => {
+    try{
+        const [rows] = await db.query("SELECT * FROM roles");
+        res.status(200).json({ success: true, roles: rows });
+    }catch(error){
+        res.status(500).json({ success: false, message: "Failed to fetch all roles", error: error.message });
+    }
+}
+
 module.exports = {
     assignVendorRole,
-    getVendorRoles
+    getVendorRoles,
+    getAllVendorRoles
 }
