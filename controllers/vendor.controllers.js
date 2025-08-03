@@ -21,9 +21,14 @@ async function addNewVendor(req, res) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        const categories = Array.isArray(product_categories)
+            ? product_categories.join(",")
+            : product_categories;
+
+
         const [insertResult] = await db.query(
             'INSERT INTO vendors (first_name, last_name, email, phone_number, product_categories, password) VALUES (?, ?, ?, ?, ?, ?)',
-            [first_name, last_name, email, phone_number, product_categories, hashedPassword]
+            [first_name, last_name, email, phone_number, categories, hashedPassword]
         );
 
         res.status(201).json({
