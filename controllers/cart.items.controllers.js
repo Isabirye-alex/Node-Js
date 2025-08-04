@@ -97,7 +97,7 @@ async function getItemsByCartId(req, res) {
     );
 
     if (items.length === 0) {
-      return res.status(200).json({ success: true, message: 'No pending cart items found' });
+      return res.status(200).json({ success: true, message: 'No pending cart items found', data:[] });
     }
 
     res.status(200).json({ success: true, data: items });
@@ -142,7 +142,7 @@ async function getActiveCart(req, res) {
     );
 
     if (rows.length === 0) {
-      return res.status(200).json({ success: true, message: 'No active cart found' });
+      return res.status(200).json({ success: true, message: 'No active cart found',data:[] });
     }
 
     res.status(200).json({
