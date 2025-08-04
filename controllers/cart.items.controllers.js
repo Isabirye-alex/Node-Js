@@ -97,7 +97,7 @@ async function getItemsByCartId(req, res) {
     );
 
     if (items.length === 0) {
-      return res.status(200).json({ success: false, message: 'No pending cart items found' });
+      return res.status(200).json({ success: true, message: 'No pending cart items found' });
     }
 
     res.status(200).json({ success: true, data: items });
