@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('./db.controller.js');
-
+const axios = require('axios')
 async function registerNewUser(req, res) {
   try {
     const { firstName, lastName, email, username, password } = req.body;
