@@ -4,32 +4,32 @@ const db = require('./db.controller.js');
 
 async function registerNewUser(req, res) {
   try {
-    const { firstName,lastName, email, username, password } = req.body;
-    const imageUrl = req.file?.path; 
-    if (!firstName ||!lastName || !email || !username || !password) {
+    const { firstName, lastName, email, username, password } = req.body;
+    const imageUrl = req.file?.path;
+    if (!firstName || !lastName || !email || !username || !password) {
       return res.status(400).json({ success: false, message: 'All fields are required except the image' });
     }
     const [user] = await db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]);
     if (user.length > 0) {
-     return res.status(409).json({ success: false, message: 'Username or email already taken' });
+      return res.status(409).json({ success: false, message: 'Username or email already taken' });
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const [result] = await db.query('INSERT INTO users(firstName, lastName, email, username, password, imageUrl) VALUES(?,?,?,?,?,?)', [firstName, lastName, email, username, hashedPassword, imageUrl]);
 
-return res.status(201).json({
-  success: true,
-  message: 'User account successfully created',
-  user: {
-    id: result.insertId, 
-    firstName,
-    lastName,
-    username,
-    email,
-    imageUrl
-  }
-});
+    return res.status(201).json({
+      success: true,
+      message: 'User account successfully created',
+      user: {
+        id: result.insertId,
+        firstName,
+        lastName,
+        username,
+        email,
+        imageUrl
+      }
+    });
 
 
   } catch (error) {
@@ -37,29 +37,64 @@ return res.status(201).json({
   }
 }
 
-async function userLogin(req, res) {
+//Track users location
+async function getGeoLocation(ip) {
   try {
-    const { username, password } = req.body;
+    const response = await axios.get(`http://ip-api.com/json/${ip}`);
+    return response.data; // includes country, region, city, lat, lon, etc.
+  } catch (error) {
+    return null;
+  }
+}
 
+
+async function userLogin(req, res) {
+  const { username, password } = req.body;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'];
+
+  const geo = await getGeoLocation(ip);
+  const country = geo?.country || null;
+  const city = geo?.city || null;
+
+  try {
     const [userRows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
     const user = userRows[0];
-console.log('userRows:', userRows);
 
-console.log('user:', user);
+    // Hash the attempted password (for logging only, don't compare hashed → hashed)
+    const hashedAttemptedPassword = await bcrypt.hash(password, 10);
 
     if (!user) {
+      // Log failed login
+      await db.query(
+        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status)
+         VALUES (?, ?, ?, ?)`,
+        [null, username, hashedAttemptedPassword, 'failed']
+      );
+
       return res.status(400).json({ success: false, message: 'Invalid username' });
     }
 
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      console.log("Password does not match for username:", username);
+      // Log failed login
+      await db.query(
+        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status)
+         VALUES (?, ?, ?, ?)`,
+        [user.id, username, hashedAttemptedPassword, 'failed']
+      );
+
       return res.status(400).json({ success: false, message: 'Invalid login credentials! Cross-check password and try again.' });
     }
 
+    // Password matched — log success
+    await db.query(
+      `INSERT INTO login_logs 
+       (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [user?.id || null, username, hashedAttemptedPassword, loginStatus, ip, userAgent, country, city]
+    );
     const token = jwt.sign({ id: user.id }, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1d' });
-
     return res.json({
       success: true,
       token,
@@ -81,8 +116,8 @@ console.log('user:', user);
 async function getUsers(req, res) {
   try {
     const [users] = await db.query('SELECT * FROM users');
-    if (users.length ===0) {
-      res.status(404).json({success:false, message:'No users found'})
+    if (users.length === 0) {
+      res.status(404).json({ success: false, message: 'No users found' })
     }
     res.status(200).json({ success: true, data: users });
   } catch (error) {
@@ -129,7 +164,7 @@ async function updateUser(req, res) {
 
 
 async function deleteUser(req, res) {
-try {
+  try {
     const { id } = req.params;
     const { firstName, lastName, email, username, password, imageUrl } = req.body;
     const [userRows] = await db.query('SELECT * FROM users where id = ?', [id]);
@@ -137,17 +172,17 @@ try {
     if (user.length === 0) {
       res.status(404).json({ success: false, message: 'User data not found' });
     }
-  
+
     await db.query(`
         DELETE FROM users WHERE id = ?
       `, [id]);
-  res.status(201).json({ success: true, message: 'User successfully deleted' });
-} catch (error) {
-  res.status(500).json({ succes: false, message: 'Could not deleted user', error: error.message });
-}
+    res.status(201).json({ success: true, message: 'User successfully deleted' });
+  } catch (error) {
+    res.status(500).json({ succes: false, message: 'Could not deleted user', error: error.message });
+  }
 }
 
- async function fetchUserByUserId (req, res) {
+async function fetchUserByUserId(req, res) {
   const { id } = req.params;
   try {
     const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
@@ -164,8 +199,8 @@ try {
 module.exports = {
   registerNewUser,
   userLogin,
-  updateUser, 
+  updateUser,
   deleteUser,
   getUsers,
-fetchUserByUserId
+  fetchUserByUserId
 };
