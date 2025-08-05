@@ -103,12 +103,15 @@ async function userLogin(req, res) {
     }
 
     // Password matched — log success
+    const loginStatus = 'success';
+
     await db.query(
       `INSERT INTO login_logs 
-       (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+   (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
+   VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [user?.id || null, username, hashedAttemptedPassword, loginStatus, ip, userAgent, country, city]
     );
+
     const token = jwt.sign({ id: user.id }, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1d' });
     return res.json({
       success: true,
