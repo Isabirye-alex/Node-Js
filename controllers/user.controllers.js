@@ -72,6 +72,9 @@ async function userLogin(req, res) {
   const geo = await getGeoLocation(ip);
   const country = geo?.country || null;
   const city = geo?.city || null;
+  const geog = await getGeoLocation("102.209.109.74"); // Replace with a known IP
+  console.log(geog);
+
 
   try {
     const [userRows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
