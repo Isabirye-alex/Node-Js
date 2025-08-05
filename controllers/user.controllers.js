@@ -83,8 +83,8 @@ async function userLogin(req, res) {
     if (!user) {
       // Log failed login
       await db.query(
-        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status)
-         VALUES (?, ?, ?, ?)`,
+        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
+         VALUES (?, ?, ?, ?,?,?,?,?)`,
         [null, username, hashedAttemptedPassword, 'failed']
       );
 
@@ -95,8 +95,8 @@ async function userLogin(req, res) {
     if (!isMatch) {
       // Log failed login
       await db.query(
-        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status)
-         VALUES (?, ?, ?, ?)`,
+        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
+         VALUES (?, ?, ?, ?,?,?,?,?)`,
         [user.id, username, hashedAttemptedPassword, 'failed']
       );
 
