@@ -70,6 +70,7 @@ async function userLogin(req, res) {
   const userAgent = req.headers['user-agent'];
 
   const geo = await getGeoLocation(ip);
+  console.log(geo);
   const country = geo?.country || null;
   const city = geo?.city || null;
   const geog = await getGeoLocation("102.209.109.74"); // Replace with a known IP
@@ -86,11 +87,12 @@ async function userLogin(req, res) {
     if (!user) {
       // Log failed login
       await db.query(
-        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
-         VALUES (?, ?, ?, ?,?,?,?,?)`,
-        [null, username, hashedAttemptedPassword, 'failed']
+        `INSERT INTO login_logs 
+         (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [null, username, hashedAttemptedPassword, 'failed', ip, userAgent, country, city]
       );
-
+      
       return res.status(400).json({ success: false, message: 'Invalid username' });
     }
 
@@ -98,11 +100,12 @@ async function userLogin(req, res) {
     if (!isMatch) {
       // Log failed login
       await db.query(
-        `INSERT INTO login_logs (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
-         VALUES (?, ?, ?, ?,?,?,?,?)`,
-        [user.id, username, hashedAttemptedPassword, 'failed']
+        `INSERT INTO login_logs 
+         (user_id, login_username, login_password_hash, login_status, ip_address, user_agent, location_country, location_city)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [user.id, username, hashedAttemptedPassword, 'failed', ip, userAgent, country, city]
       );
-
+      
       return res.status(400).json({ success: false, message: 'Invalid login credentials! Cross-check password and try again.' });
     }
 
