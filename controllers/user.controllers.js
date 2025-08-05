@@ -56,7 +56,7 @@ async function registerNewUser(req, res) {
 async function getGeoLocation(ip) {
   try {
     const response = await axios.get(`http://ip-api.com/json/${ip}`);
-    return response.data; // includes country, region, city, lat, lon, etc.
+    return response.data; 
   } catch (error) {
     return null;
   }
@@ -70,11 +70,9 @@ async function userLogin(req, res) {
   const userAgent = req.headers['user-agent'];
 
   const geo = await getGeoLocation(ip);
-  console.log(geo);
   const country = geo?.country || null;
   const city = geo?.city || null;
-  const geog = await getGeoLocation("102.209.109.74"); // Replace with a known IP
-  console.log(geog);
+
 
 
   try {
