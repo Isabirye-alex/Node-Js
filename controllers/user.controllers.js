@@ -65,7 +65,8 @@ async function getGeoLocation(ip) {
 
 async function userLogin(req, res) {
   const { username, password } = req.body;
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress;
   const userAgent = req.headers['user-agent'];
 
   const geo = await getGeoLocation(ip);
