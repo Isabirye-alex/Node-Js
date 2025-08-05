@@ -6,17 +6,31 @@ async function registerNewUser(req, res) {
   try {
     const { firstName, lastName, email, username, password } = req.body;
     const imageUrl = req.file?.path;
+
     if (!firstName || !lastName || !email || !username || !password) {
       return res.status(400).json({ success: false, message: 'All fields are required except the image' });
     }
-    const [user] = await db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email]);
+
+    const [user] = await db.query(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, email]
+    );
+
     if (user.length > 0) {
       return res.status(409).json({ success: false, message: 'Username or email already taken' });
     }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const [result] = await db.query('INSERT INTO users(firstName, lastName, email, username, password, imageUrl) VALUES(?,?,?,?,?,?)', [firstName, lastName, email, username, hashedPassword, imageUrl]);
+    const status = 'active';
+    const usertype = 'customer';
+
+    const [result] = await db.query(
+      `INSERT INTO users (firstName, lastName, email, username, password, imageUrl, status, usertype) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [firstName, lastName, email, username, hashedPassword, imageUrl, status, usertype]
+    );
 
     return res.status(201).json({
       success: true,
@@ -27,10 +41,11 @@ async function registerNewUser(req, res) {
         lastName,
         username,
         email,
-        imageUrl
+        imageUrl,
+        status,
+        usertype
       }
     });
-
 
   } catch (error) {
     return res.status(500).json({ success: false, message: 'Failed to register new user', error: error.message });
