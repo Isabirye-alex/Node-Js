@@ -1,5 +1,5 @@
 const db = require('./db.controller.js');
-//I am still here. Still trying. Still coding
+
 // Create Product
 async function createProduct(req, res) {
   try {
@@ -259,6 +259,35 @@ async function searchProducts(req, res) {
   }
 }
 
+// Get Products by Category ID
+async function getProductsByCategoryId(req, res) {
+  try {
+    const { categoryId } = req.params;
+
+    const [products] = await db.query(`
+      SELECT 
+        p.id, p.name, p.description, p.price, p.stock, p.imageUrl,
+        p.is_featured, p.brand,
+        c.id AS category_id, c.name AS categoryName,
+        s.id AS subcategory_id, s.name AS subcategoryName
+      FROM products p
+      JOIN categories c ON p.category_id = c.id
+      JOIN subcategories s ON p.subcategory_id = s.id
+      WHERE p.category_id = ?
+      ORDER BY p.name ASC
+    `, [categoryId]);
+
+    res.status(200).json({
+      success: true,
+      message: 'Products by category retrieved successfully',
+      data: products,
+      count: products.length,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error fetching products by category', error: error.message });
+  }
+}
+
 
 module.exports = {
   createProduct,
@@ -267,5 +296,6 @@ module.exports = {
   updateProduct,
   deleteProduct,
   getFeaturedProducts,
-  searchProducts
+  searchProducts,
+  getProductsByCategoryId
 };
