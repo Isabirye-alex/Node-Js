@@ -109,6 +109,35 @@ async function getAllProducts(req, res) {
   }
 }
 
+async function getSummerSaleProducts(req, res) {
+  try {
+    const sql = `
+      SELECT 
+        id, name, description, category_id, subcategory_id, price, previous_price, 
+        percentage_discount, stock, is_featured, is_hot_sale, is_summer_sale, 
+        is_new, brand, rating, reviews, created_at, updated_at, imageUrl
+      FROM products
+      WHERE is_summer_sale = 1
+      ORDER BY created_at DESC
+    `;
+
+    const [products] = await db.query(sql);
+
+    res.status(200).json({
+      success: true,
+      message: 'Summer sale products retrieved successfully',
+      data: products,
+      count: products.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching summer sale products',
+      error: error.message,
+    });
+  }
+}
+
 
 // Get Product by ID
 async function getProductById(req, res) {
@@ -303,6 +332,35 @@ async function getProductsByCategoryId(req, res) {
   }
 }
 
+async function getHotSaleProducts(req, res) {
+  try {
+    const sql = `
+      SELECT 
+        id, name, description, category_id, subcategory_id, price, previous_price, 
+        percentage_discount, stock, is_featured, is_hot_sale, is_summer_sale, 
+        is_new, brand, rating, reviews, created_at, updated_at, imageUrl
+      FROM products
+      WHERE is_hot_sale = 1
+      ORDER BY created_at DESC
+    `;
+
+    const [products] = await db.query(sql);
+
+    res.status(200).json({
+      success: true,
+      message: 'Summer sale products retrieved successfully',
+      data: products,
+      count: products.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching summer sale products',
+      error: error.message,
+    });
+  }
+}
+
 
 module.exports = {
   createProduct,
@@ -312,5 +370,7 @@ module.exports = {
   deleteProduct,
   getFeaturedProducts,
   searchProducts,
-  getProductsByCategoryId
+  getProductsByCategoryId,
+  getSummerSaleProducts,
+  getHotSaleProducts
 };
