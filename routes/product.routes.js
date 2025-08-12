@@ -9,7 +9,7 @@ router.get('/', getAllProducts);
 router.get('/search', searchProducts);
 router.get('/category/:categoryId', getProductsByCategoryId);
 router.post('/',upload.single('image'), createProduct);
-router.get('/summer-dale', getSummerSaleProducts);
+router.get('/summer-sale', getSummerSaleProducts);
 router.get('/hot-sale', getHotSaleProducts);
 router.get('/:id', getProductById);
 router.put('/:id', updateProduct);

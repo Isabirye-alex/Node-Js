@@ -355,7 +355,7 @@ async function getHotSaleProducts(req, res) {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: 'Error fetching summer sale products',
+      message: 'Error fetching hot sale products',
       error: error.message,
     });
   }
