@@ -7,7 +7,6 @@ async function createProduct(req, res) {
       name,
       description,
       category_id,
-      subcategory_id,
       price,
       stock,
       is_featured = false,
@@ -17,15 +16,15 @@ async function createProduct(req, res) {
     const isFeaturedValue = is_featured === 'true' || is_featured === true ? 1 : 0;
     const imageUrl = req.file?.path;
 
-    if (!name || !description || !category_id || !subcategory_id || price == null || stock == null || !imageUrl) {
+    if (!name || !description || !category_id || price == null || stock == null || !imageUrl) {
       return res.status(400).json({ success: false, message: 'Required fields are missing' });
     }
 
     const [result] = await db.query(
       `INSERT INTO products 
-      (name, description, category_id, subcategory_id, price, stock, imageUrl, is_featured, brand) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name.trim(), description, category_id, subcategory_id, price, stock, imageUrl, isFeaturedValue, brand]
+      (name, description, category_id, price, stock, imageUrl, is_featured, brand) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [name.trim(), description, category_id, price, stock, imageUrl, isFeaturedValue, brand]
     );
 
     res.status(201).json({
@@ -36,7 +35,6 @@ async function createProduct(req, res) {
         name,
         description,
         category_id,
-        subcategory_id,
         price,
         stock,
         imageUrl,
@@ -49,10 +47,11 @@ async function createProduct(req, res) {
     res.status(500).json({ success: false, message: 'Error creating product', error: error.message });
   }
 }
+
 // Get all Products
 async function getAllProducts(req, res) {
   try {
-    const { category_id, subcategory_id } = req.query;
+    const { category_id } = req.query;
 
     let sql = `
       SELECT 
@@ -60,7 +59,6 @@ async function getAllProducts(req, res) {
         p.name,
         p.description,
         p.category_id,
-        p.subcategory_id,
         p.price,
         p.previous_price,
         p.percentage_discount,
@@ -75,11 +73,9 @@ async function getAllProducts(req, res) {
         p.created_at,
         p.updated_at,
         p.imageUrl,
-        c.name AS categoryName,
-        s.name AS subcategoryName
+        c.name AS categoryName
       FROM products p
       JOIN categories c ON p.category_id = c.id
-      JOIN subcategories s ON p.subcategory_id = s.id
     `;
 
     const params = [];
@@ -87,11 +83,6 @@ async function getAllProducts(req, res) {
     if (category_id) {
       sql += ' WHERE p.category_id = ?';
       params.push(category_id);
-    }
-
-    if (subcategory_id) {
-      sql += category_id ? ' AND p.subcategory_id = ?' : ' WHERE p.subcategory_id = ?';
-      params.push(subcategory_id);
     }
 
     sql += ' ORDER BY p.id DESC';
@@ -113,7 +104,7 @@ async function getSummerSaleProducts(req, res) {
   try {
     const sql = `
       SELECT 
-        id, name, description, category_id, subcategory_id, price, previous_price, 
+        id, name, description, category_id, price, previous_price, 
         percentage_discount, stock, is_featured, is_hot_sale, is_summer_sale, 
         is_new, brand, rating, reviews, created_at, updated_at, imageUrl
       FROM products
@@ -138,7 +129,6 @@ async function getSummerSaleProducts(req, res) {
   }
 }
 
-
 // Get Product by ID
 async function getProductById(req, res) {
   try {
@@ -147,11 +137,9 @@ async function getProductById(req, res) {
     const [rows] = await db.query(`
       SELECT 
         p.*, 
-        c.name AS categoryName,
-        s.name AS subcategoryName
+        c.name AS categoryName
       FROM products p
       JOIN categories c ON p.category_id = c.id
-      JOIN subcategories s ON p.subcategory_id = s.id
       WHERE p.id = ?
     `, [id]);
 
@@ -180,7 +168,6 @@ async function updateProduct(req, res) {
       name,
       description,
       category_id,
-      subcategory_id,
       price,
       stock,
       imageUrl,
@@ -188,7 +175,6 @@ async function updateProduct(req, res) {
       brand
     } = req.body;
 
-    // Convert to 0/1 for MySQL
     const isFeaturedValue = is_featured === 'true' || is_featured === true ? 1 : 0;
 
     const [check] = await db.query('SELECT * FROM products WHERE id = ?', [id]);
@@ -198,10 +184,10 @@ async function updateProduct(req, res) {
 
     await db.query(`
       UPDATE products 
-      SET name = ?, description = ?, category_id = ?, subcategory_id = ?, price = ?, stock = ?, imageUrl = ?, is_featured = ?, brand = ? 
+      SET name = ?, description = ?, category_id = ?, price = ?, stock = ?, imageUrl = ?, is_featured = ?, brand = ? 
       WHERE id = ?
     `, [
-      name, description, category_id, subcategory_id,
+      name, description, category_id,
       price, stock, JSON.stringify(imageUrl || []),
       isFeaturedValue, brand ?? '', id
     ]);
@@ -237,11 +223,9 @@ async function getFeaturedProducts(req, res) {
       SELECT
         p.id, p.name, p.description, p.price, p.stock, p.imageUrl,
         p.is_featured, p.brand,
-        c.id AS category_id, c.name AS categoryName,
-        s.id AS subcategory_id, s.name AS subcategoryName
+        c.id AS category_id, c.name AS categoryName
       FROM products p
       JOIN categories c ON p.category_id = c.id
-      JOIN subcategories s ON p.subcategory_id = s.id
       WHERE p.is_featured = 1
       ORDER BY p.name ASC
     `);
@@ -279,11 +263,9 @@ async function searchProducts(req, res) {
       SELECT 
         p.id, p.name, p.description, p.price, p.stock, p.imageUrl,
         p.is_featured, p.brand,
-        c.id AS category_id, c.name AS categoryName,
-        s.id AS subcategory_id, s.name AS subcategoryName
+        c.id AS category_id, c.name AS categoryName
       FROM products p
       JOIN categories c ON p.category_id = c.id
-      JOIN subcategories s ON p.subcategory_id = s.id
       WHERE p.name LIKE ? OR p.description LIKE ?
       ORDER BY p.name ASC
     `, [searchTerm, searchTerm]);
@@ -312,11 +294,9 @@ async function getProductsByCategoryId(req, res) {
       SELECT 
         p.id, p.name, p.description, p.price, p.stock, p.imageUrl,
         p.is_featured, p.brand,
-        c.id AS category_id, c.name AS categoryName,
-        s.id AS subcategory_id, s.name AS subcategoryName
+        c.id AS category_id, c.name AS categoryName
       FROM products p
       JOIN categories c ON p.category_id = c.id
-      JOIN subcategories s ON p.subcategory_id = s.id
       WHERE p.category_id = ?
       ORDER BY p.name ASC
     `, [categoryId]);
@@ -336,7 +316,7 @@ async function getHotSaleProducts(req, res) {
   try {
     const sql = `
       SELECT 
-        id, name, description, category_id, subcategory_id, price, previous_price, 
+        id, name, description, category_id, price, previous_price, 
         percentage_discount, stock, is_featured, is_hot_sale, is_summer_sale, 
         is_new, brand, rating, reviews, created_at, updated_at, imageUrl
       FROM products
@@ -348,7 +328,7 @@ async function getHotSaleProducts(req, res) {
 
     res.status(200).json({
       success: true,
-      message: 'Summer sale products retrieved successfully',
+      message: 'Hot sale products retrieved successfully',
       data: products,
       count: products.length,
     });
