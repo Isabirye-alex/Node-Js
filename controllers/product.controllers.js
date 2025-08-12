@@ -56,10 +56,27 @@ async function getAllProducts(req, res) {
 
     let sql = `
       SELECT 
-        p.id, p.name, p.description, p.price, p.stock, p.imageUrl, 
-        p.is_featured, p.brand, 
-        c.id AS category_id, c.name AS categoryName, 
-        s.id AS subcategory_id, s.name AS subcategoryName
+        p.id,
+        p.name,
+        p.description,
+        p.category_id,
+        p.subcategory_id,
+        p.price,
+        p.previous_price,
+        p.percentage_discount,
+        p.stock,
+        p.is_featured,
+        p.is_hot_sale,
+        p.is_summer_sale,
+        p.is_new,
+        p.brand,
+        p.rating,
+        p.reviews,
+        p.created_at,
+        p.updated_at,
+        p.imageUrl,
+        c.name AS categoryName,
+        s.name AS subcategoryName
       FROM products p
       JOIN categories c ON p.category_id = c.id
       JOIN subcategories s ON p.subcategory_id = s.id
@@ -77,8 +94,7 @@ async function getAllProducts(req, res) {
       params.push(subcategory_id);
     }
 
-    // Only order by name, no LIMIT/OFFSET
-    sql += ' ORDER BY p.name ASC';
+    sql += ' ORDER BY p.id DESC';
 
     const [products] = await db.query(sql, params);
 
@@ -88,7 +104,6 @@ async function getAllProducts(req, res) {
       data: products,
       count: products.length,
     });
-
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching products', error: error.message });
   }
