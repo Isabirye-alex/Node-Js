@@ -149,7 +149,7 @@ async function sendOrderEmail(req, res) {
       paymentMethod,
       shippingAddress,
       orderItems,
-      total
+      total_amount
     } = req.body;
 
     const transporter = nodemailer.createTransport({
@@ -190,7 +190,7 @@ async function sendOrderEmail(req, res) {
         paymentMethod,
         shippingAddress,
         orderItems,
-        total,
+        total_amount,
       },
     };
 
@@ -207,7 +207,7 @@ console.log({
   paymentMethod,
   shippingAddress,
   orderItems,
-  total,
+  total_amount,
 });
 
         return res.status(200).json({ success: true, message: "Order email sent successfully" });
